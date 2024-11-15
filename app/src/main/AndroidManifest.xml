@@ -13,6 +13,24 @@
         android:theme="@style/Theme.MoodChecker"
         tools:targetApi="31">
         <activity
+            android:name=".SoundPageActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MoodPage"
+            android:exported="false" />
+        <activity
+            android:name=".ViewFlashcardsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".IDCardProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".FlashcardsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".DashboardActivity"
+            android:exported="false" />
+        <activity
             android:name=".MoodHistoryActivity"
             android:exported="false" />
         <activity

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="16dp">
+
+    <!-- Logo at the top (optional) -->
+    <ImageView
+        android:id="@+id/logoImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center" />
+
+    <!-- Mood title -->
+    <TextView
+        android:id="@+id/moodTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="You're feeling.."
+        android:textSize="24sp"
+        android:textColor="#333333"
+        android:paddingTop="16dp" />
+
+    <!-- Mood status -->
+    <TextView
+        android:id="@+id/moodStatusTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="HAPPY"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:textColor="#FF5722" />
+
+    <!-- Mood message -->
+    <TextView
+        android:id="@+id/moodMessageTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="We’re glad to see you’re feeling great! Keep that positive energy going..."
+        android:textSize="16sp"
+        android:textColor="#555555"
+        android:gravity="center" />
+
+    <!-- Continue button -->
+    <Button
+        android:id="@+id/continueButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="24dp"
+        android:text="Continue to app"
+        android:textColor="#FFFFFF"
+        android:padding="12dp" />
+</LinearLayout>

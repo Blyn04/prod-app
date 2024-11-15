@@ -1,0 +1,209 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#FFFFFF"
+    android:padding="24dp">
+
+    <!-- Header -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start|center_vertical">
+
+        <!-- Logo (Replace with your logo image) -->
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:contentDescription="Logo" />
+
+        <!-- Back Button -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Back"
+            android:drawablePadding="8dp"
+            android:padding="8dp"
+            android:textColor="#000000"
+            android:textSize="16sp"
+            android:gravity="center_vertical"
+            android:onClick="navigateBack"/>
+
+    </LinearLayout>
+
+    <!-- Title and Description -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="What do you want to listen to now?"
+        android:textSize="24sp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose from soothing lofi sounds for focus, sleep, or study to create the perfect vibe for your session."
+        android:textSize="16sp"
+        android:textColor="#666666"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="8dp" />
+
+    <!-- Mood Buttons -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="24dp">
+
+        <Button
+            android:id="@+id/focusButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Focus"
+            android:textSize="16sp"
+            android:backgroundTint="#FFF6D5"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:layout_marginEnd="8dp"/>
+
+        <Button
+            android:id="@+id/calmButton"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:text="Calm"
+            android:textSize="16sp"
+            android:backgroundTint="#E0F7FA"
+            android:drawablePadding="8dp"
+            android:gravity="center"
+            android:layout_marginStart="8dp"/>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/studyButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:text="Study"
+        android:textSize="16sp"
+        android:backgroundTint="#E8EAF6"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Toggle Sounds Section -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Toggle Sounds"
+        android:textSize="18sp"
+        android:textColor="#000000"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center_horizontal"
+        android:layout_marginTop="24dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp">
+
+        <!-- Rain Sound Button -->
+        <LinearLayout
+            android:id="@+id/rainSoundButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="Rain Sound" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Rain"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Toggle Switch for Rain Sound -->
+            <Switch
+                android:id="@+id/rainSoundSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Toggle Rain Sound"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+        <!-- Coffee Shop Sound Button -->
+        <LinearLayout
+            android:id="@+id/coffeeShopButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:contentDescription="Coffee Shop Sound" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Coffee Shop"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="8dp"/>
+
+            <!-- Toggle Switch for Coffee Shop Sound -->
+            <Switch
+                android:id="@+id/coffeeShopSwitch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Toggle Coffee Sound"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/stopButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:text="Stop Music"
+        android:textSize="16sp"
+        android:backgroundTint="#FFCDD2"
+        android:textColor="#000000"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/startReviewingButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="32dp"
+        android:paddingStart="24dp"
+        android:paddingEnd="24dp"
+        android:text="Start Reviewing"
+        android:textSize="16sp"
+        android:backgroundTint="#E0E0E0"
+        android:textColor="#000000" />
+</LinearLayout>

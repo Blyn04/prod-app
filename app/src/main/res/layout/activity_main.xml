@@ -30,18 +30,18 @@
 
     <!-- Mood options as buttons -->
     <Button
-        android:id="@+id/anxietyButton"
+        android:id="@+id/sleepyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Anxiety"
+        android:text="Sleepy"
         android:backgroundTint="#FFCCBC"
         android:layout_margin="8dp"/>
 
     <Button
-        android:id="@+id/joyButton"
+        android:id="@+id/sickButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Joy"
+        android:text="Sick"
         android:backgroundTint="#FFF176"
         android:layout_margin="8dp"/>
 
@@ -54,10 +54,10 @@
         android:layout_margin="8dp"/>
 
     <Button
-        android:id="@+id/distractedButton"
+        android:id="@+id/happyButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Distracted"
+        android:text="Happy"
         android:backgroundTint="#D1C4E9"
         android:layout_margin="8dp"/>
 

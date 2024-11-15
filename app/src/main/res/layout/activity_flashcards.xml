@@ -1,0 +1,72 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Question"
+        android:textSize="18sp"
+        android:layout_marginBottom="8dp" />
+
+    <EditText
+        android:id="@+id/questionInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your question here" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Answer Type"
+        android:textSize="18sp"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Spinner for selecting answer type -->
+    <Spinner
+        android:id="@+id/answerTypeSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/answer_types" />
+
+    <!-- EditText for multiple choice or short answer -->
+    <EditText
+        android:id="@+id/answerInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter the answer here"
+        android:layout_marginTop="16dp" />
+
+    <!-- EditText for short text input (Initially hidden) -->
+    <EditText
+        android:id="@+id/shortTextInput"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter your short answer"
+        android:visibility="gone" /> <!-- Hidden by default -->
+
+    <Button
+        android:id="@+id/addFlashcardButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Add Flashcard"
+        android:layout_marginTop="16dp" />
+
+    <Button
+        android:id="@+id/viewFlashcardsButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="View Flashcards"
+        android:layout_marginTop="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/flashcardsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_weight="1" />
+
+</LinearLayout>
