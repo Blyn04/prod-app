@@ -37,7 +37,7 @@ public class CreateReviewerActivity extends AppCompatActivity {
 
         // Find dialog views
         EditText reviewerNameEditText = dialog.findViewById(R.id.reviewerNameEditText);
-        EditText reviewerEmailEditText = dialog.findViewById(R.id.reviewerEmailEditText);
+        EditText reviewerEmailEditText = dialog.findViewById(R.id.reviewerDescriptionEditText);
         Button saveButton = dialog.findViewById(R.id.saveButton);
         Button cancelButton = dialog.findViewById(R.id.cancelButton);
 

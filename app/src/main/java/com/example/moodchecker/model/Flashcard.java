@@ -10,6 +10,7 @@ public class Flashcard implements Serializable {
     private List<String> options;
     private String correctAnswer;
     private boolean isAnswered = false;
+    private boolean isCorrect = false;
 
     public Flashcard(String question, String answer, String answerType, List<String> options) {
         this.question = question;
@@ -64,5 +65,13 @@ public class Flashcard implements Serializable {
 
     public void setAnswered(boolean answered) {
         isAnswered = answered;
+    }
+
+    public boolean isCorrect() {
+        return isCorrect;
+    }
+
+    public void setCorrect(boolean correct) {
+        isCorrect = correct;
     }
 }

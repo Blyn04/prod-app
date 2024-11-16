@@ -1,6 +1,7 @@
 package com.example.moodchecker;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -12,9 +13,15 @@ import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.moodchecker.model.Flashcard;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ViewFlashcardsActivity extends AppCompatActivity {
 
@@ -25,13 +32,19 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
     private TextView questionTextView;
     private RadioButton optionOne, optionTwo, optionThree, optionFour;
     private TextView streakTextView;
-
     private int streakCount = 0;
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_view_flashcards);
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userId = mAuth.getCurrentUser().getUid(); // Make sure to authenticate users
+
+        loadStreakFromFirebase();
 
         // Initialize flashcards list from intent
         flashcards = (List<Flashcard>) getIntent().getSerializableExtra("flashcardsList");
@@ -60,6 +73,9 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         nextButton.setOnClickListener(view -> {
             if (currentIndex < flashcards.size() - 1) {
                 currentIndex++;
+                Flashcard flashcard = flashcards.get(currentIndex);
+                flashcard.setAnswered(false); // Reset the answer status
+                flashcard.setCorrect(false);  // Reset correctness
                 displayFlashcard(currentIndex);
             }
         });
@@ -76,8 +92,9 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
             Flashcard flashcard = flashcards.get(currentIndex);
             String correctAnswer = flashcard.getCorrectAnswer();
 
-            if (flashcard.isAnswered()) {
-                Toast.makeText(ViewFlashcardsActivity.this, "You have already answered this question!", Toast.LENGTH_SHORT).show();
+            if (flashcard.isAnswered() && flashcard.isCorrect()) {
+                // Don't allow resubmission if the answer was correct
+                Toast.makeText(ViewFlashcardsActivity.this, "You have already answered this question correctly!", Toast.LENGTH_SHORT).show();
                 return;
             }
 
@@ -87,14 +104,17 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
                 if (selectedAnswer != null) {
                     if (selectedAnswer.equals(correctAnswer)) {
                         streakCount++;
+                        flashcard.setCorrect(true); // Mark as correct
+                        saveStreakToFirebase(streakCount);
                         Toast.makeText(ViewFlashcardsActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
                     } else {
                         streakCount = 0;
+                        flashcard.setCorrect(false); // Mark as incorrect
+                        saveStreakToFirebase(streakCount);
                         Toast.makeText(ViewFlashcardsActivity.this, "Incorrect. The correct answer is: " + correctAnswer, Toast.LENGTH_SHORT).show();
                     }
                     flashcard.setAnswered(true);
                     updateStreakDisplay();
-
                 } else {
                     Toast.makeText(ViewFlashcardsActivity.this, "Please select an answer.", Toast.LENGTH_SHORT).show();
                 }
@@ -105,14 +125,17 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
                 if (!userAnswer.isEmpty()) {
                     if (userAnswer.equalsIgnoreCase(correctAnswer)) {
                         streakCount++;
+                        flashcard.setCorrect(true); // Mark as correct
+                        saveStreakToFirebase(streakCount);
                         Toast.makeText(ViewFlashcardsActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
                     } else {
                         streakCount = 0;
+                        flashcard.setCorrect(false); // Mark as incorrect
+                        saveStreakToFirebase(streakCount);
                         Toast.makeText(ViewFlashcardsActivity.this, "Incorrect. The correct answer is: " + correctAnswer, Toast.LENGTH_SHORT).show();
                     }
                     flashcard.setAnswered(true);
                     updateStreakDisplay();
-
                 } else {
                     Toast.makeText(ViewFlashcardsActivity.this, "Please enter an answer.", Toast.LENGTH_SHORT).show();
                 }
@@ -253,4 +276,68 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         okButton.setOnClickListener(v -> dialog.dismiss());
     }
 
+    private void saveStreakToFirebase(int streakCount) {
+        // Get the current user's UID
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        // Get Firestore instance and reference to the user's streaks
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference streakRef = db.collection("users").document(userId).collection("streaks").document();
+
+        // Create a streak data object
+        HashMap<String, Object> streakData = new HashMap<>();
+        streakData.put("streak", streakCount);
+
+        // Save streak data to Firestore
+        streakRef.set(streakData)
+                .addOnSuccessListener(aVoid -> Log.d("Firestore", "Streak updated successfully"))
+                .addOnFailureListener(e -> Log.w("Firestore", "Error updating streak", e));
+    }
+
+
+    private void loadStreakFromFirebase() {
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+//        db.collection("users")
+//                .document(userId)
+//                .get()
+//                .addOnSuccessListener(documentSnapshot -> {
+//                    if (documentSnapshot.exists()) {
+//                        Integer savedStreak = documentSnapshot.getLong("streak").intValue();
+//                        streakCount = savedStreak; // Set the streak from Firebase
+//                        updateStreakDisplay(); // Update UI
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    // Handle failure to retrieve streak
+//                    Log.w("Firestore", "Error getting streak", e);
+//                });
+
+        db.collection("users")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        // Retrieve the streak value safely
+                        Long savedStreakLong = documentSnapshot.getLong("streak");
+
+                        if (savedStreakLong != null) {
+                            streakCount = savedStreakLong.intValue(); // If valid, set it
+                        } else {
+                            streakCount = 0; // Default to 0 if the streak is missing
+                        }
+
+                        updateStreakDisplay(); // Update UI
+                    } else {
+                        // Handle case where the document does not exist
+                        streakCount = 0; // Default to 0 if the user document does not exist
+                        updateStreakDisplay();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle failure to retrieve streak
+                    Log.w("Firestore", "Error getting streak", e);
+                });
+
+    }
 }

@@ -86,7 +86,18 @@ public class FlashcardsActivity extends AppCompatActivity {
                 String question = questionInput.getText().toString();
                 String answer = selectedAnswerType.equals("Short Text") ? shortTextInput.getText().toString() : answerInput.getText().toString();
 
-                if (!question.isEmpty() && !answer.isEmpty()) {
+                // Check if the question already exists in the list
+                boolean isDuplicate = false;
+                for (Flashcard flashcard : flashcards) {
+                    if (flashcard.getQuestion().equalsIgnoreCase(question)) {
+                        isDuplicate = true;
+                        break;
+                    }
+                }
+
+                if (isDuplicate) {
+                    Toast.makeText(this, "This question already exists. Please enter a unique question.", Toast.LENGTH_SHORT).show();
+                } else if (!question.isEmpty() && !answer.isEmpty()) {
                     List<String> options = new ArrayList<>();
                     String correctAnswer = "";
 
@@ -127,6 +138,7 @@ public class FlashcardsActivity extends AppCompatActivity {
                 Toast.makeText(this, "You can only add up to 100 flashcards", Toast.LENGTH_SHORT).show();
             }
         });
+
 
 
         // Navigate to view flashcards page

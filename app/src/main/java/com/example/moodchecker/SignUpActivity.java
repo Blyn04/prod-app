@@ -24,8 +24,8 @@ public class SignUpActivity extends AppCompatActivity {
     EditText usernameEditText, passwordEditText, confirmPasswordEditText, emailEditText;
     Button signUpButton;
     TextView loginPrompt;
-
     FirebaseAuth mAuth;
+    FirebaseFirestore db;
 
     private static final String CHANNEL_ID = "sign_up_notification_channel";
 
@@ -63,13 +63,35 @@ public class SignUpActivity extends AppCompatActivity {
                     Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
                 } else {
                     // Create user with Firebase Authentication
-                    signUpWithFirebase(username, email, password);
+                   // signUpWithFirebase(username, email, password);
+                    checkUsernameAvailability(username, email, password);
+
                 }
             }
         });
 
         // Create notification channel if Android version is Oreo or above
         createNotificationChannel();
+    }
+
+    private void checkUsernameAvailability(String username, String email, String password) {
+        // Check if the username already exists in Firestore
+        db.collection("users")
+                .whereEqualTo("username", username)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        if (!task.getResult().isEmpty()) {
+                            // If the username already exists, show a message
+                            Toast.makeText(SignUpActivity.this, "Username is already taken, please choose another", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Proceed with sign-up if username is unique
+                            signUpWithFirebase(username, email, password);
+                        }
+                    } else {
+                        Toast.makeText(SignUpActivity.this, "Error checking username", Toast.LENGTH_SHORT).show();
+                    }
+                });
     }
 
     private void signUpWithFirebase(String username, String email, String password) {
@@ -81,6 +103,7 @@ public class SignUpActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
                         // Optionally store the username and other details in Firestore
                         storeUserDataInDatabase(username, email);
+
                     } else {
                         // If sign-up fails, display a message to the user
                         Toast.makeText(SignUpActivity.this, "Sign-up failed: " + task.getException().getMessage(), Toast.LENGTH_SHORT).show();

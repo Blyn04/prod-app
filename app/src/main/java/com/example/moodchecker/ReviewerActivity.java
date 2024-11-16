@@ -1,6 +1,5 @@
 package com.example.moodchecker;
 
-
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -16,10 +15,16 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ReviewerActivity extends AppCompatActivity {
 
     private ImageView backButton;
     private Button createNewReviewerButton;
+
+    // List to keep track of existing reviewer names
+    private List<String> reviewerNames = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +57,7 @@ public class ReviewerActivity extends AppCompatActivity {
 
         // Find dialog views
         EditText reviewerNameEditText = dialog.findViewById(R.id.reviewerNameEditText);
-        EditText reviewerEmailEditText = dialog.findViewById(R.id.reviewerEmailEditText);
+        EditText reviewerDescriptionEditText = dialog.findViewById(R.id.reviewerDescriptionEditText);
         Button saveButton = dialog.findViewById(R.id.saveButton);
         Button cancelButton = dialog.findViewById(R.id.cancelButton);
 
@@ -61,15 +66,23 @@ public class ReviewerActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String name = reviewerNameEditText.getText().toString().trim();
-                String email = reviewerEmailEditText.getText().toString().trim();
+                String description = reviewerDescriptionEditText.getText().toString().trim();
 
-                if (name.isEmpty() || email.isEmpty()) {
+                if (name.isEmpty() || description.isEmpty()) {
                     Toast.makeText(ReviewerActivity.this, "Please enter all details", Toast.LENGTH_SHORT).show();
                 } else {
-                    // Perform action to save reviewer details
-                    addReviewerFolder(name);
-                    Toast.makeText(ReviewerActivity.this, "Reviewer added", Toast.LENGTH_SHORT).show();
-                    dialog.dismiss();
+                    // Check if the reviewer name is unique
+                    if (reviewerNames.contains(name)) {
+                        Toast.makeText(ReviewerActivity.this, "This reviewer title already exists. Please choose a different title.", Toast.LENGTH_SHORT).show();
+                    } else {
+                        // Add the new reviewer name to the list
+                        reviewerNames.add(name);
+
+                        // Perform action to save reviewer details
+                        addReviewerFolder(name);
+                        Toast.makeText(ReviewerActivity.this, "Reviewer added", Toast.LENGTH_SHORT).show();
+                        dialog.dismiss();
+                    }
                 }
             }
         });

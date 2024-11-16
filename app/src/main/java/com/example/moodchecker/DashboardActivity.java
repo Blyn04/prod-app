@@ -118,125 +118,154 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
-        addTaskButton.setOnClickListener(v -> {
-            // Inflate the custom layout
-            View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_task, null);
+            addTaskButton.setOnClickListener(v -> {
+                // Inflate the custom layout
+                View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_task, null);
 
-            // Initialize the dialog fields
-            EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
-            Spinner statusSpinner = dialogView.findViewById(R.id.statusSpinner);
-            TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);  // Updated to TextView for date picker
-            EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
-            EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
-            EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
-            Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
-            Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
+                // Initialize the dialog fields
+                EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
+                Spinner statusSpinner = dialogView.findViewById(R.id.statusSpinner);
+                TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);  // Updated to TextView for date picker
+                EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
+                EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
+                EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
+                Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
+                Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
 
-            // Set up the spinner with status options
-            ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this,
-                    android.R.layout.simple_spinner_item, new String[]{"Not Started", "In Progress", "Complete"});
-            statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-            statusSpinner.setAdapter(statusAdapter);
+                // Set up the spinner with status options
+                ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this,
+                        android.R.layout.simple_spinner_item, new String[]{"Not Started", "In Progress", "Complete"});
+                statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                statusSpinner.setAdapter(statusAdapter);
 
-            // Set up the AlertDialog
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setView(dialogView)
-                    .setTitle("Add Task")
-                    .setPositiveButton("Save", (dialog, which) -> {
-                        // Get input values
-                        String taskName = taskNameEditText.getText().toString();
-                        String status = statusSpinner.getSelectedItem().toString();
-                        String deadline = deadlineTextView.getText().toString();
+                // Set up the AlertDialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setView(dialogView)
+                        .setTitle("Add Task")
+                        .setPositiveButton("Save", (dialog, which) -> {
+                            // Get input values
+                            String taskName = taskNameEditText.getText().toString();
 
-                        // Get timer values (hours, minutes, seconds)
-                        int hours = Integer.parseInt(hoursEditText.getText().toString());
-                        int minutes = Integer.parseInt(minutesEditText.getText().toString());
-                        int seconds = Integer.parseInt(secondsEditText.getText().toString());
+                            if (taskName.isEmpty()) {
+                                // Show an alert if the task name is empty
+                                new AlertDialog.Builder(DashboardActivity.this)
+                                        .setTitle("Error")
+                                        .setMessage("Please enter a task name.")
+                                        .setPositiveButton("OK", null)
+                                        .show();
+                                return;  // Don't proceed to save the task
+                            }
 
-                        // Calculate the total duration in milliseconds
-                        long timerDuration = (hours * 3600 + minutes * 60 + seconds) * 1000;
+                            String status = statusSpinner.getSelectedItem().toString();
+                            String deadline = deadlineTextView.getText().toString();
 
-                        // Add a new task to the list with the timer duration
-                        TodoItem newTask = new TodoItem(taskName, status, deadline, timerDuration);
-                        todoList.add(newTask);
-                        todoAdapter.notifyItemInserted(todoList.size() - 1);
-                        todoRecyclerView.scrollToPosition(todoList.size() - 1);
+                            boolean taskNameExists = false;
+                            for (TodoItem task : todoList) {
+                                if (task.getName().equalsIgnoreCase(taskName)) {
+                                    taskNameExists = true;
+                                    break;
+                                }
+                            }
 
-                        // Step 4: Set the alarm for the notification
-                        long currentTime = System.currentTimeMillis();
-                        long triggerTime = currentTime + timerDuration; // Set the alarm to trigger after timerDuration
-
-                        if (triggerTime - currentTime < 30000) {
-                            triggerTime = currentTime + 30000; // Set trigger time to be 30 seconds from now
-                        }
-
-                        Log.d("Alarm", "Trigger time: " + triggerTime + ", Current time: " + currentTime);
-                        // Check if the app can schedule exact alarms (Android 12 and above)
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                            if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
-                                // Set the alarm to trigger the notification
-                                Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
-                                notificationIntent.putExtra("taskName", taskName);
-
-                                PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                                        DashboardActivity.this,
-                                        0,
-                                        notificationIntent,
-                                        PendingIntent.FLAG_IMMUTABLE);
-
-
-                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                            if (taskNameExists) {
+                                // Show an alert dialog if the task name already exists
+                                new AlertDialog.Builder(DashboardActivity.this)
+                                        .setTitle("Error")
+                                        .setMessage("Task name must be unique!")
+                                        .setPositiveButton("OK", null)
+                                        .show();
                             } else {
-                                // Redirect user to request permission to schedule exact alarms
-                                Intent intents = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                                startActivity(intents);
+
+                                // Get timer values (hours, minutes, seconds)
+                                int hours = Integer.parseInt(hoursEditText.getText().toString());
+                                int minutes = Integer.parseInt(minutesEditText.getText().toString());
+                                int seconds = Integer.parseInt(secondsEditText.getText().toString());
+
+                                // Calculate the total duration in milliseconds
+                                long timerDuration = (hours * 3600 + minutes * 60 + seconds) * 1000;
+
+                                // Add a new task to the list with the timer duration
+                                TodoItem newTask = new TodoItem(taskName, status, deadline, timerDuration);
+                                todoList.add(newTask);
+                                todoAdapter.notifyItemInserted(todoList.size() - 1);
+                                todoRecyclerView.scrollToPosition(todoList.size() - 1);
+
+                                // Step 4: Set the alarm for the notification
+                                long currentTime = System.currentTimeMillis();
+                                long triggerTime = currentTime + timerDuration; // Set the alarm to trigger after timerDuration
+
+                                if (triggerTime - currentTime < 30000) {
+                                    triggerTime = currentTime + 30000; // Set trigger time to be 30 seconds from now
+                                }
+
+                                Log.d("Alarm", "Trigger time: " + triggerTime + ", Current time: " + currentTime);
+                                // Check if the app can schedule exact alarms (Android 12 and above)
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                                    if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
+                                        // Set the alarm to trigger the notification
+                                        Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
+                                        notificationIntent.putExtra("taskName", taskName);
+
+                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                                                DashboardActivity.this,
+                                                0,
+                                                notificationIntent,
+                                                PendingIntent.FLAG_IMMUTABLE);
+
+
+                                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                                    } else {
+                                        // Redirect user to request permission to schedule exact alarms
+                                        Intent intents = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                                        startActivity(intents);
+                                    }
+                                } else {
+                                    // For Android versions below 12, directly schedule the exact alarm
+                                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                                    if (alarmManager != null) {
+                                        Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
+                                        notificationIntent.putExtra("taskName", taskName);
+
+                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                                                DashboardActivity.this,
+                                                0,
+                                                notificationIntent,
+                                                PendingIntent.FLAG_IMMUTABLE);
+
+
+                                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                                    }
+                                }
                             }
-                        } else {
-                            // For Android versions below 12, directly schedule the exact alarm
-                            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                            if (alarmManager != null) {
-                                Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
-                                notificationIntent.putExtra("taskName", taskName);
+                        })
+                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
-                                PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                                        DashboardActivity.this,
-                                        0,
-                                        notificationIntent,
-                                        PendingIntent.FLAG_IMMUTABLE);
+                // Show the dialog
+                AlertDialog dialog = builder.create();
+                dialog.show();
 
+                // Set up the DatePickerDialog for the deadline
+                deadlineTextView.setOnClickListener(deadlineView -> {
+                    final Calendar calendar = Calendar.getInstance();
+                    int year = calendar.get(Calendar.YEAR);
+                    int month = calendar.get(Calendar.MONTH);
+                    int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-                            }
-                        }
-                    })
-                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+                    DatePickerDialog datePickerDialog = new DatePickerDialog(DashboardActivity.this,
+                            (view, selectedYear, selectedMonth, selectedDay) -> {
+                                // Format the selected date
+                                String selectedDate = String.format("%02d/%02d/%d", selectedMonth + 1, selectedDay, selectedYear);
+                                deadlineTextView.setText(selectedDate);
+                            }, year, month, day);
 
-            // Show the dialog
-            AlertDialog dialog = builder.create();
-            dialog.show();
+                    // Disable past dates
+                    calendar.set(year, month, day);
+                    datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis()); // This disables all past dates.
 
-            // Set up the DatePickerDialog for the deadline
-            deadlineTextView.setOnClickListener(deadlineView -> {
-                final Calendar calendar = Calendar.getInstance();
-                int year = calendar.get(Calendar.YEAR);
-                int month = calendar.get(Calendar.MONTH);
-                int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-                DatePickerDialog datePickerDialog = new DatePickerDialog(DashboardActivity.this,
-                        (view, selectedYear, selectedMonth, selectedDay) -> {
-                            // Format the selected date
-                            String selectedDate = String.format("%02d/%02d/%d", selectedMonth + 1, selectedDay, selectedYear);
-                            deadlineTextView.setText(selectedDate);
-                        }, year, month, day);
-
-                // Disable past dates
-                calendar.set(year, month, day);
-                datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis()); // This disables all past dates.
-
-                // Show the DatePickerDialog
-                datePickerDialog.show();
-            });
+                    // Show the DatePickerDialog
+                    datePickerDialog.show();
+                });
 
             // Timer logic: Start the timer when the button is clicked
             startTimerButton.setOnClickListener(v1 -> {

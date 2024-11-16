@@ -19,17 +19,17 @@
         android:id="@+id/reviewerNameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Reviewer Name"
+        android:hint="Reviewer Title"
         android:inputType="textPersonName"
         android:padding="8dp"
         android:background="@android:color/white"
         android:layout_marginBottom="8dp" />
 
     <EditText
-        android:id="@+id/reviewerEmailEditText"
+        android:id="@+id/reviewerDescriptionEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Reviewer Email"
+        android:hint="Short Description"
         android:inputType="textEmailAddress"
         android:padding="8dp"
         android:background="@android:color/white"
