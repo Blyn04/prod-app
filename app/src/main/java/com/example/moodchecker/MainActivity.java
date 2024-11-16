@@ -1,29 +1,37 @@
 package com.example.moodchecker;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private TextView dateTextView;
     private TextView moodQuestion;
     private MediaPlayer mediaPlayer;
-    private SharedPreferences sharedPreferences;
+    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        sharedPreferences = getSharedPreferences("MoodPreferences", MODE_PRIVATE);
+        // Initialize Firebase
+        databaseReference = FirebaseDatabase.getInstance().getReference("moods");
 
         dateTextView = findViewById(R.id.dateTextView);
         moodQuestion = findViewById(R.id.moodQuestion);
@@ -31,7 +39,7 @@ public class MainActivity extends AppCompatActivity {
         String currentDate = new SimpleDateFormat("dd MMMM", Locale.getDefault()).format(new Date());
         dateTextView.setText(currentDate);
 
-        // Set up mood buttons with corresponding messages
+        // Set up mood buttons
         setupMoodButton(R.id.sleepyButton, "Tired", R.raw.yawns, "Looks like you've been working hard! Remember to take breaks and stay hydrated. A quick walk or some deep breaths can help refresh you.");
         setupMoodButton(R.id.sickButton, "Sick", R.raw.sneeze, "Sorry, you're not feeling well. Rest as much as possible and don’t push yourself too hard. Your health comes first!");
         setupMoodButton(R.id.calmButton, "Calm", R.raw.sparkle, "Feeling calm is a gift! Use this moment to focus and enjoy a productive, peaceful study session. Stay grounded and keep up the great work.");
@@ -44,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 playSound(soundResourceId);
-                saveMood(mood);
+                saveMoodToFirestore(mood);
 
                 Intent intent = new Intent(MainActivity.this, MoodPage.class);
                 intent.putExtra("selectedMood", mood);
@@ -55,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void playSound(int soundResourceId) {
-        // If mediaPlayer is not already playing, play the sound
         if (mediaPlayer == null || !mediaPlayer.isPlaying()) {
             mediaPlayer = MediaPlayer.create(this, soundResourceId);
             mediaPlayer.start();
@@ -65,18 +72,30 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 mp.release();
-                mediaPlayer = null; // Set mediaPlayer to null when the sound finishes
+                mediaPlayer = null;
             }
         });
     }
 
-    private void saveMood(String mood) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString("selectedMood", mood);
-        editor.putString("moodDate", dateTextView.getText().toString());
-        editor.apply();
+    private void saveMoodToFirestore(String mood) {
+        String currentDate = new SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(new Date());
 
-        moodQuestion.setText("Mood saved: " + mood);
+        // Get the current user's UID
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        // Get Firestore instance and reference to the user's moods
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference moodRef = db.collection("users").document(userId).collection("moods").document();
+
+        // Create a mood data object
+        HashMap<String, String> moodData = new HashMap<>();
+        moodData.put("date", currentDate);
+        moodData.put("mood", mood);
+
+        // Save mood data to Firestore
+        moodRef.set(moodData)
+                .addOnSuccessListener(aVoid -> moodQuestion.setText("Mood saved: " + mood))
+                .addOnFailureListener(e -> moodQuestion.setText("Failed to save mood"));
     }
 
     @Override

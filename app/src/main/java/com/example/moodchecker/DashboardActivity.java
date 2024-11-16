@@ -1,8 +1,14 @@
 package com.example.moodchecker;
 
+import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -76,11 +82,11 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Initialize data
         todoList = new ArrayList<>();
-        todoList.add(new TodoItem("Networking HW#1", "In Progress", "09/12/24"));
-        todoList.add(new TodoItem("Networking HW#1", "Complete", "09/12/24"));
-        todoList.add(new TodoItem("Networking HW#1", "Not Started", "09/12/24"));
-        todoList.add(new TodoItem("Networking HW#1", "Not Started", "09/12/24"));
-        todoList.add(new TodoItem("Networking HW#1", "In Progress", "09/12/24"));
+//        todoList.add(new TodoItem("Networking HW#1", "In Progress", "09/12/24"));
+//        todoList.add(new TodoItem("Networking HW#1", "Complete", "09/12/24"));
+//        todoList.add(new TodoItem("Networking HW#1", "Not Started", "09/12/24"));
+//        todoList.add(new TodoItem("Networking HW#1", "Not Started", "09/12/24"));
+//        todoList.add(new TodoItem("Networking HW#1", "In Progress", "09/12/24"));
 
         // Set adapter
         todoAdapter = new TodoAdapter(todoList);
@@ -142,10 +148,67 @@ public class DashboardActivity extends AppCompatActivity {
                         String status = statusSpinner.getSelectedItem().toString();
                         String deadline = deadlineTextView.getText().toString();
 
-                        // Add a new task to the list
-                        todoList.add(new TodoItem(taskName, status, deadline));
+                        // Get timer values (hours, minutes, seconds)
+                        int hours = Integer.parseInt(hoursEditText.getText().toString());
+                        int minutes = Integer.parseInt(minutesEditText.getText().toString());
+                        int seconds = Integer.parseInt(secondsEditText.getText().toString());
+
+                        // Calculate the total duration in milliseconds
+                        long timerDuration = (hours * 3600 + minutes * 60 + seconds) * 1000;
+
+                        // Add a new task to the list with the timer duration
+                        TodoItem newTask = new TodoItem(taskName, status, deadline, timerDuration);
+                        todoList.add(newTask);
                         todoAdapter.notifyItemInserted(todoList.size() - 1);
                         todoRecyclerView.scrollToPosition(todoList.size() - 1);
+
+                        // Step 4: Set the alarm for the notification
+                        long currentTime = System.currentTimeMillis();
+                        long triggerTime = currentTime + timerDuration; // Set the alarm to trigger after timerDuration
+
+                        if (triggerTime - currentTime < 30000) {
+                            triggerTime = currentTime + 30000; // Set trigger time to be 30 seconds from now
+                        }
+
+                        Log.d("Alarm", "Trigger time: " + triggerTime + ", Current time: " + currentTime);
+                        // Check if the app can schedule exact alarms (Android 12 and above)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                            if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
+                                // Set the alarm to trigger the notification
+                                Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
+                                notificationIntent.putExtra("taskName", taskName);
+
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                                        DashboardActivity.this,
+                                        0,
+                                        notificationIntent,
+                                        PendingIntent.FLAG_IMMUTABLE);
+
+
+                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                            } else {
+                                // Redirect user to request permission to schedule exact alarms
+                                Intent intents = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                                startActivity(intents);
+                            }
+                        } else {
+                            // For Android versions below 12, directly schedule the exact alarm
+                            AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+                            if (alarmManager != null) {
+                                Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
+                                notificationIntent.putExtra("taskName", taskName);
+
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(
+                                        DashboardActivity.this,
+                                        0,
+                                        notificationIntent,
+                                        PendingIntent.FLAG_IMMUTABLE);
+
+
+                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+                            }
+                        }
                     })
                     .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
 
@@ -166,18 +229,59 @@ public class DashboardActivity extends AppCompatActivity {
                             String selectedDate = String.format("%02d/%02d/%d", selectedMonth + 1, selectedDay, selectedYear);
                             deadlineTextView.setText(selectedDate);
                         }, year, month, day);
+
+                // Disable past dates
+                calendar.set(year, month, day);
+                datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis()); // This disables all past dates.
+
+                // Show the DatePickerDialog
                 datePickerDialog.show();
             });
 
-            // Timer button actions (optional, implement your timer functionality here)
-            startTimerButton.setOnClickListener(timerView -> {
-                // Start timer logic
+            // Timer logic: Start the timer when the button is clicked
+            startTimerButton.setOnClickListener(v1 -> {
+                startTimerButton.setEnabled(false);  // Disable start button once started
+                stopTimerButton.setEnabled(true);   // Enable stop button
+
+                // You can implement the timer logic here using a Handler or TimerTask
+                // Example of updating the timer every second:
+                final Handler handler = new Handler();
+                final int[] secondsRemaining = {0};  // To keep track of the elapsed time
+                Runnable timerRunnable = new Runnable() {
+                    @Override
+                    public void run() {
+                        // Update the timer fields every second
+                        secondsRemaining[0]++;
+
+                        int hours = secondsRemaining[0] / 3600;
+                        int minutes = (secondsRemaining[0] % 3600) / 60;
+                        int seconds = secondsRemaining[0] % 60;
+
+                        // Update the EditText fields with the current time
+                        hoursEditText.setText(String.format("%02d", hours));
+                        minutesEditText.setText(String.format("%02d", minutes));
+                        secondsEditText.setText(String.format("%02d", seconds));
+
+                        // Continue running the timer every second
+                        handler.postDelayed(this, 1000);
+                    }
+                };
+
+                // Start the timer
+                handler.post(timerRunnable);
             });
 
-            stopTimerButton.setOnClickListener(timerView -> {
-                // Stop timer logic
+            // Stop the timer logic
+            stopTimerButton.setOnClickListener(v12 -> {
+                startTimerButton.setEnabled(true);  // Re-enable the start button
+                stopTimerButton.setEnabled(false); // Disable stop button
+
+                // Stop the timer and update the task with the final time
+                // Store the time in timerDuration (convert back to milliseconds)
+                // You may need a way to store the elapsed time in a variable for future tasks
             });
         });
+
 
 
         removeTaskButton.setOnClickListener(v -> {

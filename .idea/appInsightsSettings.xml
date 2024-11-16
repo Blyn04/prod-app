@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.example.moodchecker" />
+                  <option name="mobileSdkAppId" value="1:608200375609:android:548881f8e4f6ade5e0fce8" />
+                  <option name="projectId" value="moodchecker-78ed1" />
+                  <option name="projectNumber" value="608200375609" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
