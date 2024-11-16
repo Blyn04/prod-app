@@ -82,41 +82,49 @@ public class FlashcardsActivity extends AppCompatActivity {
         });
 
         addFlashcardButton.setOnClickListener(view -> {
-            String question = questionInput.getText().toString();
-            String answer = selectedAnswerType.equals("Short Text") ? shortTextInput.getText().toString() : answerInput.getText().toString();
+            if (flashcards.size() < 100) {
+                String question = questionInput.getText().toString();
+                String answer = selectedAnswerType.equals("Short Text") ? shortTextInput.getText().toString() : answerInput.getText().toString();
 
-            if (!question.isEmpty() && !answer.isEmpty()) {
-                List<String> options = new ArrayList<>();
-                String correctAnswer = "";
+                if (!question.isEmpty() && !answer.isEmpty()) {
+                    List<String> options = new ArrayList<>();
+                    String correctAnswer = "";
 
-                // For Multiple Choice questions, split options by commas
-                if (selectedAnswerType.equals("Multiple Choice")) {
-                    String[] optionArray = answer.split(",");
-                    for (String option : optionArray) {
-                        options.add(option.trim());
+                    // For Multiple Choice questions, split options by commas
+                    if (selectedAnswerType.equals("Multiple Choice")) {
+                        String[] optionArray = answer.split(",");
+                        for (String option : optionArray) {
+                            options.add(option.trim());
+                        }
+                        correctAnswer = "yes";  // Hardcoded correct answer for now (could be dynamic based on user input)
+
+                    } else {
+                        options.add(answer);  // For short text questions, the answer is the correct one
+                        correctAnswer = answer;
                     }
-                    correctAnswer = "yes";  // Hardcoded correct answer for now (could be dynamic based on user input)
+
+                    // Create a new Flashcard and add it to the list
+                    Flashcard newFlashcard = new Flashcard(question, answer, selectedAnswerType, options);
+                    newFlashcard.setCorrectAnswer(correctAnswer);  // Set the correct answer
+                    flashcards.add(newFlashcard);
+
+                    // Notify the adapter to update the RecyclerView
+                    adapter.notifyDataSetChanged();
+
+                    // Clear the input fields after adding the flashcard
+                    questionInput.setText("");
+                    answerInput.setText("");
+                    shortTextInput.setText("");  // Clear short text input
+
+                    Toast.makeText(this, "Flashcard added", Toast.LENGTH_SHORT).show();
+
                 } else {
-                    options.add(answer);  // For short text questions, the answer is the correct one
-                    correctAnswer = answer;
+                    Toast.makeText(this, "Please enter a question and answer", Toast.LENGTH_SHORT).show();
                 }
 
-                // Create a new Flashcard and add it to the list
-                Flashcard newFlashcard = new Flashcard(question, answer, selectedAnswerType, options);
-                newFlashcard.setCorrectAnswer(correctAnswer);  // Set the correct answer
-                flashcards.add(newFlashcard);
-
-                // Notify the adapter to update the RecyclerView
-                adapter.notifyDataSetChanged();
-
-                // Clear the input fields after adding the flashcard
-                questionInput.setText("");
-                answerInput.setText("");
-                shortTextInput.setText("");  // Clear short text input
-
-                Toast.makeText(this, "Flashcard added", Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "Please enter a question and answer", Toast.LENGTH_SHORT).show();
+                // If the number of flashcards exceeds 100, show a warning
+                Toast.makeText(this, "You can only add up to 100 flashcards", Toast.LENGTH_SHORT).show();
             }
         });
 

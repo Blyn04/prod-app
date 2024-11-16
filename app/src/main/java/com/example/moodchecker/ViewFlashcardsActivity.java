@@ -8,6 +8,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.moodchecker.model.Flashcard;
 
@@ -180,5 +182,75 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
 
     private void updateStreakDisplay() {
         streakTextView.setText("Streak: " + streakCount);
+
+        // Show specific message based on the streak count
+        String message = "";
+
+        switch (streakCount) {
+            case 10:
+                message = "You're doing great! Keep up the momentum!";
+                break;
+            case 20:
+                message = "Fantastic progress! Your hard work is paying off!";
+                break;
+            case 30:
+                message = "Impressive! You’re mastering this material!";
+                break;
+            case 40:
+                message = "Amazing focus! You’re well on your way to acing this.";
+                break;
+            case 50:
+                message = "Halfway to 100! Keep that knowledge growing!";
+                break;
+            case 60:
+                message = "Incredible dedication! You're truly committed.";
+                break;
+            case 70:
+                message = "You're unstoppable! Just a few more to hit 100!";
+                break;
+            case 80:
+                message = "Your effort is inspiring! Keep pushing forward.";
+                break;
+            case 90:
+                message = "Almost at 100! You're a reviewing champion!";
+                break;
+            case 100:
+                message = "Congratulations on 100! Your dedication is remarkable!";
+                break;
+            default:
+                message = "";
+                break;
+        }
+
+        // If a message is available for the streak, show it
+        if (!message.isEmpty()) {
+            showStreakPopup(streakCount, message);
+        }
     }
+
+    private void showStreakPopup(int streak, String message) {
+        // Inflate the custom layout
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_streak, null);
+
+        // Create the dialog
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setView(dialogView);
+
+        // Customize dialog elements
+        TextView streakMessage = dialogView.findViewById(R.id.streakMessage);
+        TextView streakCountMessage = dialogView.findViewById(R.id.streakCountMessage);
+        Button okButton = dialogView.findViewById(R.id.okButton);
+
+        // Update the dialog message based on streak count
+        streakCountMessage.setText("You've reached a streak of " + streak + "!");
+        streakMessage.setText(message);
+
+        // Show the dialog
+        androidx.appcompat.app.AlertDialog dialog = builder.create();
+        dialog.show();
+
+        // Handle the OK button click
+        okButton.setOnClickListener(v -> dialog.dismiss());
+    }
+
 }

@@ -1,0 +1,45 @@
+<!-- res/layout/dialog_streak.xml -->
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="@drawable/dialog_backgroundstreak">
+
+    <ImageView
+        android:id="@+id/streakIcon"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_celebration"
+        android:layout_gravity="center"
+        android:contentDescription="Trophy Icon" />
+
+    <TextView
+        android:id="@+id/streakMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Congratulations!"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="16dp" />
+
+    <TextView
+        android:id="@+id/streakCountMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="You've reached a streak of 10!"
+        android:gravity="center"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/okButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Okay"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#A1E58B"
+        android:textColor="#FFFFFF" />
+</LinearLayout>

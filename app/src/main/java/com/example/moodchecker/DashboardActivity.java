@@ -99,7 +99,7 @@ public class DashboardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate to ID Card Profile Activity
-                Intent profileIntent = new Intent(DashboardActivity.this, IDCardProfileActivity.class);
+                Intent profileIntent = new Intent(DashboardActivity.this, ProfileActivity.class);
                 startActivity(profileIntent);
             }
         });
