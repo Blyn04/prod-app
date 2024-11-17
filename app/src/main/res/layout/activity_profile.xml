@@ -52,6 +52,7 @@
 
             <!-- Profile Picture Placeholder -->
             <ImageView
+                android:id="@+id/profileAvatar"
                 android:layout_width="80dp"
                 android:layout_height="80dp"
                 android:layout_marginEnd="16dp"
@@ -60,6 +61,7 @@
                 android:scaleType="centerCrop"
                 android:layout_gravity="center_vertical"
                 android:layout_marginBottom="8dp" />
+
 
             <!-- Name, Streak, and Barcode Info -->
             <LinearLayout
@@ -140,7 +142,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Color"
+            android:text="Card Color"
             android:textSize="16sp"
             android:fontFamily="sans-serif-medium"
             android:textColor="#000000"
@@ -215,15 +217,15 @@
                     android:id="@+id/avatarOption1"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:background="#F5C6A5"
+                    android:src="@drawable/avatar1"
                     android:layout_margin="8dp"
-                    android:contentDescription="Avatar 1" />
+                    android:contentDescription="Avatar 1"  />
 
                 <ImageView
                     android:id="@+id/avatarOption2"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:background="#ABB2B9"
+                    android:src="@drawable/avatar2"
                     android:layout_margin="8dp"
                     android:contentDescription="Avatar 2" />
 
@@ -231,11 +233,65 @@
                     android:id="@+id/avatarOption3"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
-                    android:background="#F1948A"
+                    android:src="@drawable/avatar3"
                     android:layout_margin="8dp"
                     android:contentDescription="Avatar 3" />
 
-                <!-- Add more avatars if needed -->
+                <ImageView
+                    android:id="@+id/avatarOption4"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/avatar4"
+                    android:layout_margin="8dp"
+                    android:contentDescription="Avatar 4" />
+
+                <ImageView
+                    android:id="@+id/avatarOption5"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/avatar5"
+                    android:layout_margin="8dp"
+                    android:contentDescription="Avatar 5" />
+
+                <ImageView
+                    android:id="@+id/avatarOption6"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/avatar6"
+                    android:layout_margin="8dp"
+                    android:contentDescription="Avatar 6" />
+
+                <ImageView
+                    android:id="@+id/avatarOption7"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/avatar7"
+                    android:layout_margin="8dp"
+                    android:contentDescription="Avatar7" />
+
+                <ImageView
+                    android:id="@+id/avatarOption8"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/avatar8"
+                    android:layout_margin="8dp"
+                    android:contentDescription="Avatar 8" />
+
+                <ImageView
+                    android:id="@+id/avatarOption9"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/avatar9"
+                    android:layout_margin="8dp"
+                    android:contentDescription="Avatar 9" />
+
+                <ImageView
+                    android:id="@+id/avatarOption10"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:src="@drawable/avatar10"
+                    android:layout_margin="8dp"
+                    android:contentDescription="Avatar 10" />
 
             </LinearLayout>
         </HorizontalScrollView>
@@ -247,6 +303,17 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Save Changes"
+            android:backgroundTint="#F5CBA7"
+            android:layout_marginTop="32dp"
+            android:paddingHorizontal="32dp"
+            android:paddingVertical="12dp"
+            android:visibility="gone"/>
+
+        <Button
+            android:id="@+id/btnEditSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit"
             android:backgroundTint="#F5CBA7"
             android:layout_marginTop="32dp"
             android:paddingHorizontal="32dp"

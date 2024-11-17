@@ -5,6 +5,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,7 +26,9 @@ public class ProfileActivity extends AppCompatActivity {
 
     private TextView tvStreak;
     private EditText etName, etGmail;
-    private ImageView colorOption1, colorOption2, colorOption3, avatarOption1, avatarOption2, avatarOption3;
+    private Button btnEditSave;
+    private boolean isEditing = false;
+    private ImageView colorOption1, colorOption2, colorOption3, avatarOption1, avatarOption2, avatarOption3, avatarOption4, avatarOption5, avatarOption6, avatarOption7, avatarOption8, avatarOption9, avatarOption10;
     private LinearLayout idCardSection;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -38,6 +41,8 @@ public class ProfileActivity extends AppCompatActivity {
         // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
+
+        btnEditSave = findViewById(R.id.btnEditSave);
 
         // Initialize UI components
         etName = findViewById(R.id.etName);
@@ -52,6 +57,13 @@ public class ProfileActivity extends AppCompatActivity {
         avatarOption1 = findViewById(R.id.avatarOption1);
         avatarOption2 = findViewById(R.id.avatarOption2);
         avatarOption3 = findViewById(R.id.avatarOption3);
+        avatarOption4 = findViewById(R.id.avatarOption4);
+        avatarOption5 = findViewById(R.id.avatarOption5);
+        avatarOption6 = findViewById(R.id.avatarOption6);
+        avatarOption7 = findViewById(R.id.avatarOption7);
+        avatarOption8 = findViewById(R.id.avatarOption8);
+        avatarOption9 = findViewById(R.id.avatarOption9);
+        avatarOption10 = findViewById(R.id.avatarOption10);
 
         // Set click listeners for color options
         colorOption1.setOnClickListener(view -> updateColor("#A3E4D7"));
@@ -62,6 +74,13 @@ public class ProfileActivity extends AppCompatActivity {
         avatarOption1.setOnClickListener(view -> updateAvatar(1));
         avatarOption2.setOnClickListener(view -> updateAvatar(2));
         avatarOption3.setOnClickListener(view -> updateAvatar(3));
+        avatarOption4.setOnClickListener(view -> updateAvatar(4));
+        avatarOption5.setOnClickListener(view -> updateAvatar(5));
+        avatarOption6.setOnClickListener(view -> updateAvatar(6));
+        avatarOption7.setOnClickListener(view -> updateAvatar(7));
+        avatarOption8.setOnClickListener(view -> updateAvatar(8));
+        avatarOption9.setOnClickListener(view -> updateAvatar(9));
+        avatarOption10.setOnClickListener(view -> updateAvatar(10));
 
         if (tvStreak != null) {
             tvStreak.setText("0"); // Set the streak to 0
@@ -83,6 +102,18 @@ public class ProfileActivity extends AppCompatActivity {
             // Save changes to Firestore if needed (optional)
             saveChanges(newName, newGmail);
         });
+
+        btnEditSave.setOnClickListener(view -> {
+            if (isEditing) {
+                // Save changes
+                saveChanges(etName.getText().toString(), etGmail.getText().toString());
+                toggleEditing(false); // Exit editing mode
+            } else {
+                // Enter editing mode
+                toggleEditing(true);
+            }
+        });
+        toggleEditing(false);
 
         // Load the current user's profile data from Firestore
         loadUserProfile();
@@ -140,13 +171,19 @@ public class ProfileActivity extends AppCompatActivity {
                         // Get user details from the document
                         String name = documentSnapshot.getString("username");
                         String email = documentSnapshot.getString("email");
-
+                        String cardColor = documentSnapshot.getString("cardColor");
 
                         User user = new User(name, email);
 
                         // Set the fetched details in the UI
-                        etName.setText(user.getUsername());
-                        etGmail.setText(user.getEmail());
+                        if (name != null) etName.setText(name);
+                        if (email != null) etGmail.setText(email);
+                        if (cardColor != null) {
+                            GradientDrawable background = (GradientDrawable) idCardSection.getBackground();
+                            background.setColor(android.graphics.Color.parseColor(cardColor));
+                        }
+
+                        toggleEditing(false);
                     } else {
                         Toast.makeText(ProfileActivity.this, "User data not found!", Toast.LENGTH_SHORT).show();
                     }
@@ -154,26 +191,222 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Toast.makeText(ProfileActivity.this, "Error loading profile data", Toast.LENGTH_SHORT).show();
                 });
+
+        db.collection("users").document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String avatar = documentSnapshot.getString("avatar");
+                        if (avatar != null) {
+                            switch (avatar) {
+                                case "avatar1":
+                                    updateAvatar(1);
+                                    break;
+                                case "avatar2":
+                                    updateAvatar(2);
+                                    break;
+                                case "avatar3":
+                                    updateAvatar(3);
+                                    break;
+                                case "avatar4":
+                                    updateAvatar(4);
+                                    break;
+                                case "avatar5":
+                                    updateAvatar(5);
+                                    break;
+                                case "avatar6":
+                                    updateAvatar(6);
+                                    break;
+                                case "avatar7":
+                                    updateAvatar(7);
+                                    break;
+                                case "avatar8":
+                                    updateAvatar(8);
+                                    break;
+                                case "avatar9":
+                                    updateAvatar(9);
+                                    break;
+                                case "avatar10":
+                                    updateAvatar(10);
+                                    break;
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> Log.e("ProfileActivity", "Failed to load user profile", e));
     }
 
     private void updateColor(String color) {
-        try {
-            Drawable background = idCardSection.getBackground();
-            if (background instanceof GradientDrawable) {
-                GradientDrawable backgroundDrawable = (GradientDrawable) background;
-                backgroundDrawable.setColor(android.graphics.Color.parseColor(color));
-                Toast.makeText(this, "Color updated to " + color, Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(this, "Background is not a GradientDrawable!", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IllegalArgumentException e) {
-            Toast.makeText(this, "Invalid color value!", Toast.LENGTH_SHORT).show();
+        // Change the color of the ID Card section
+        GradientDrawable background = (GradientDrawable) idCardSection.getBackground();
+        background.setColor(android.graphics.Color.parseColor(color));
+
+        // Save the selected color to Firestore
+        saveColorToDatabase(color);
+
+        // Optional: Show a confirmation message
+        Toast.makeText(ProfileActivity.this, "Color updated", Toast.LENGTH_SHORT).show();
+    }
+
+    private void saveColorToDatabase(String color) {
+        // Get the current user's ID
+        String userId = mAuth.getCurrentUser().getUid();
+
+        // Create a map to store the color data
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("cardColor", color);
+
+        // Update the user's document in Firestore
+        db.collection("users").document(userId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> {
+                    Log.d("ProfileActivity", "Color updated successfully in Firestore");
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("ProfileActivity", "Error updating color in Firestore", e);
+                });
+    }
+
+    private void updateAvatar(int avatarIndex) {
+        String selectedAvatar = "avatar" + avatarIndex;
+        // Save the selected avatar to Firestore or SharedPreferences
+        saveAvatarToDatabase(selectedAvatar);
+
+        // Provide feedback (e.g., highlight the selected avatar)
+        switch (avatarIndex) {
+            case 1:
+                avatarOption1.setBackgroundResource(R.drawable.selected_border); // Optional visual feedback
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(0);
+                break;
+            case 2:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(R.drawable.selected_border);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(0);
+                break;
+            case 3:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(R.drawable.selected_border);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(0);
+                break;
+            case 4:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(R.drawable.selected_border);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(0);
+                break;
+            case 5:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(R.drawable.selected_border);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(0);
+                break;
+            case 6:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(R.drawable.selected_border);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(0);
+                break;
+            case 7:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(R.drawable.selected_border);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(0);
+                break;
+            case 8:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(R.drawable.selected_border);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(0);
+                break;
+            case 9:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(R.drawable.selected_border);
+                avatarOption10.setBackgroundResource(0);
+                break;
+
+            case 10:
+                avatarOption1.setBackgroundResource(0);
+                avatarOption2.setBackgroundResource(0);
+                avatarOption3.setBackgroundResource(0);
+                avatarOption4.setBackgroundResource(0);
+                avatarOption5.setBackgroundResource(0);
+                avatarOption6.setBackgroundResource(0);
+                avatarOption7.setBackgroundResource(0);
+                avatarOption8.setBackgroundResource(0);
+                avatarOption9.setBackgroundResource(0);
+                avatarOption10.setBackgroundResource(R.drawable.selected_border);
+                break;
         }
     }
 
-    private void updateAvatar(int avatarId) {
-        // Update avatar logic (e.g., store selected avatar ID)
-        Toast.makeText(this, "Avatar " + avatarId + " selected", Toast.LENGTH_SHORT).show();
+    private void saveAvatarToDatabase(String avatarName) {
+        String userId = mAuth.getCurrentUser().getUid();
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("avatar", avatarName);
+
+        db.collection("users").document(userId)
+                .update(updates)
+                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Avatar updated!", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Log.e("ProfileActivity", "Failed to update avatar", e));
     }
 
     // Optional: Save changes to Firestore when the user edits their profile
@@ -190,5 +423,18 @@ public class ProfileActivity extends AppCompatActivity {
                 .update(userUpdates)
                 .addOnSuccessListener(aVoid -> Toast.makeText(ProfileActivity.this, "Profile updated", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Toast.makeText(ProfileActivity.this, "Error updating profile", Toast.LENGTH_SHORT).show());
+    }
+
+    private void toggleEditing(boolean enable) {
+        isEditing = enable;
+
+        // Toggle EditText fields' editable state
+        etName.setFocusableInTouchMode(enable);
+        etName.setCursorVisible(enable);
+        etGmail.setFocusableInTouchMode(enable);
+        etGmail.setCursorVisible(enable);
+
+        // Update button text
+        btnEditSave.setText(enable ? "Save Changes" : "Edit");
     }
 }
