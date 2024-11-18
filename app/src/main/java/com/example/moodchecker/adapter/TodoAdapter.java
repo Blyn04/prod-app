@@ -3,13 +3,17 @@ package com.example.moodchecker.adapter;
 import android.content.Context;
 import android.content.Intent;
 import android.text.InputType;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
@@ -19,6 +23,10 @@ import com.example.moodchecker.R;
 import com.example.moodchecker.TimerActivity;
 import com.example.moodchecker.TimerService;
 import com.example.moodchecker.model.TodoItem;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -26,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder> {
     private List<TodoItem> todoList;
     private TaskClickListener listener;
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public TodoAdapter(List<TodoItem> todoList) {
         this.todoList = todoList;
@@ -49,6 +58,8 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
         holder.status.setText(item.getStatus());
         holder.deadline.setText(item.getDeadline());
 
+        holder.checkBox.setChecked(false);
+
         // Set status text color based on task status
         if (item.getStatus().equals("In Progress")) {
             holder.status.setTextColor(ContextCompat.getColor(holder.status.getContext(), R.color.yellow));
@@ -60,6 +71,18 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
             holder.status.setTextColor(ContextCompat.getColor(holder.status.getContext(), R.color.black));
         }
 
+        // Set up the checkbox listener
+        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            Log.d("TodoAdapter", "Checkbox checked: " + isChecked);
+            if (isChecked) {
+                buttonView.setEnabled(false);
+                // Show confirmation dialog to remove the task
+                String taskName = item.getName();
+                showRemoveConfirmationDialog(holder.itemView.getContext(), taskName, position);
+            }
+        }
+        );
+
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onTaskClick(item);
@@ -67,6 +90,93 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
                 showTaskDetailsDialog(item, v.getContext());
             }
         });
+    }
+
+    // Method to show the confirmation dialog when the checkbox is checked
+    private void showRemoveConfirmationDialog(Context context, String taskName, int position) {
+        new AlertDialog.Builder(context)
+                .setTitle("Remove Task")
+                .setMessage("Do you want to remove this task?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                    removeTaskFromFirestore(context, userId, taskName, position);
+                })
+                .setNegativeButton("No", (dialog, which) -> {
+                    // Uncheck the checkbox when the user clicks "No"
+                    todoList.get(position).setChecked(false); // Update the model if you store the checked state
+                    notifyItemChanged(position); // Refresh the item view
+                    dialog.dismiss();
+                })
+                .create()
+                .show();
+    }
+
+    // Method to remove task from Firestore and update the UI
+    private void removeTaskFromFirestore(Context context, String userId, String taskName, int position) {
+        // Log the userId and taskName to debug
+        Log.d("TodoAdapter", "Removing task with taskName: " + taskName + " for userId: " + userId);
+
+        // Ensure taskName is not null or empty
+        if (taskName == null || taskName.isEmpty()) {
+            showErrorDialog(context, "Invalid Task Name.");
+            return;
+        }
+
+        // Ensure userId is not null or empty
+        if (userId == null || userId.isEmpty()) {
+            showErrorDialog(context, "Invalid User ID.");
+            return;
+        }
+
+        // Reference to Firestore tasks collection
+        CollectionReference tasksRef = db.collection("users")
+                .document(userId)
+                .collection("tasks");
+
+        // Query the tasks collection for the task by its name
+        tasksRef.whereEqualTo("name", taskName)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        // Task found, proceed to delete
+                        for (DocumentSnapshot document : task.getResult()) {
+                            // Delete the task document
+                            tasksRef.document(document.getId())
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Successfully deleted the task
+                                        Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show();
+
+                                        // Update the RecyclerView after deletion
+                                        todoList.remove(position);
+                                        notifyItemRemoved(position);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Error occurred during task deletion
+                                        Toast.makeText(context, "Error deleting task", Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    } else {
+                        // No task found with the specified name
+                        Toast.makeText(context, "Task not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle query failure
+                    showErrorDialog(context, "Error querying tasks: " + e.getMessage());
+                });
+    }
+
+
+
+    // Method to show an error dialog
+    private void showErrorDialog(Context context, String message) {
+        new AlertDialog.Builder(context)
+                .setTitle("Error")
+                .setMessage(message)
+                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
+                .create()
+                .show();
     }
 
     // Method to show the edit timer dialog
@@ -212,21 +322,14 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
 
     public static class TodoViewHolder extends RecyclerView.ViewHolder {
         TextView name, status, deadline;
+        CheckBox checkBox;
 
         public TodoViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.todoName);
             status = itemView.findViewById(R.id.todoStatus);
             deadline = itemView.findViewById(R.id.todoDeadline);
+            checkBox = itemView.findViewById(R.id.todoCheckbox);
         }
-    }
-
-    private void showErrorDialog(Context context, String message) {
-        new AlertDialog.Builder(context)
-                .setTitle("Error")
-                .setMessage(message)
-                .setPositiveButton("OK", (dialog, which) -> dialog.dismiss())
-                .create()
-                .show();
     }
 }

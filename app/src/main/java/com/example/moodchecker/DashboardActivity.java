@@ -247,7 +247,7 @@ public class DashboardActivity extends AppCompatActivity {
                                         .show();
                             } else {
 
-                                TodoItem newTask = new TodoItem(taskName, status, deadline);
+                                TodoItem newTask = new TodoItem(taskName, status, deadline, null); // Set id as null initially
 
                                 // Add the task to Firestore
                                 db.collection("users")
@@ -255,6 +255,9 @@ public class DashboardActivity extends AppCompatActivity {
                                         .collection("tasks") // Subcollection for tasks
                                         .add(newTask)
                                         .addOnSuccessListener(documentReference -> {
+                                            // Assign the generated id to the task after it's added to Firestore
+                                            newTask.setId(documentReference.getId());
+
                                             // Add task to the local list and update RecyclerView
                                             todoList.add(newTask);
                                             todoAdapter.notifyItemInserted(todoList.size() - 1);
