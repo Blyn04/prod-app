@@ -12,6 +12,8 @@ public class Flashcard implements Serializable {
     private boolean isAnswered = false;
     private boolean isCorrect = false;
 
+    public Flashcard() {}
+
     public Flashcard(String question, String answer, String answerType, List<String> options) {
         this.question = question;
         this.answer = answer;

@@ -2,7 +2,9 @@ package com.example.moodchecker;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -12,8 +14,21 @@ import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.view.MenuItem;
+import android.widget.PopupMenu;
+import android.graphics.Color;
+import android.widget.RadioGroup;
+import android.widget.RadioButton;
+import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.moodchecker.model.Reviewer;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +37,8 @@ public class ReviewerActivity extends AppCompatActivity {
 
     private ImageView backButton;
     private Button createNewReviewerButton;
-
+    private FirebaseFirestore db; // Firestore instance
+    private FirebaseAuth mAuth; // Firebase Authentication instance
     // List to keep track of existing reviewer names
     private List<String> reviewerNames = new ArrayList<>();
 
@@ -30,6 +46,9 @@ public class ReviewerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reviewer);
+
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
 
         backButton = findViewById(R.id.backButton);
         createNewReviewerButton = findViewById(R.id.createNewReviewerButton);
@@ -47,6 +66,8 @@ public class ReviewerActivity extends AppCompatActivity {
                 showAddReviewerDialog();
             }
         });
+
+        fetchReviewersFromFirestore();
     }
 
     private void showAddReviewerDialog() {
@@ -78,6 +99,9 @@ public class ReviewerActivity extends AppCompatActivity {
                         // Add the new reviewer name to the list
                         reviewerNames.add(name);
 
+                        // Add the new reviewer to Firebase
+                        addReviewerToFirestore(name, description);
+
                         // Perform action to save reviewer details
                         addReviewerFolder(name);
                         Toast.makeText(ReviewerActivity.this, "Reviewer added", Toast.LENGTH_SHORT).show();
@@ -99,6 +123,30 @@ public class ReviewerActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void addReviewerToFirestore(String name, String description) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();  // Get current user ID
+            CollectionReference reviewersRef = db.collection("users")
+                    .document(userId)
+                    .collection("reviewer");
+
+            // Create a new reviewer document
+            Reviewer reviewer = new Reviewer(name, description);
+            reviewersRef.add(reviewer)
+                    .addOnSuccessListener(documentReference -> {
+                        // Successfully added reviewer
+                        Log.d("Firestore", "Reviewer added with ID: " + documentReference.getId());
+                    })
+                    .addOnFailureListener(e -> {
+                        // Failed to add reviewer
+                        Log.w("Firestore", "Error adding reviewer", e);
+                    });
+        } else {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+        }
+    }
+
     private void addReviewerFolder(String reviewerName) {
         GridLayout folderGrid = findViewById(R.id.folderGrid);
 
@@ -111,5 +159,302 @@ public class ReviewerActivity extends AppCompatActivity {
 
         // Add the folder item to the GridLayout
         folderGrid.addView(folderItem);
+
+        // Get the 3-dots menu icon
+        ImageView moreOptionsIcon = folderItem.findViewById(R.id.moreOptionsIcon);
+
+        // Set click listener for the 3-dots menu
+        moreOptionsIcon.setOnClickListener(v -> {
+
+            moreOptionsIcon.setColorFilter(getResources().getColor(R.color.red), PorterDuff.Mode.SRC_IN);
+
+            // Create and show the PopupMenu
+            PopupMenu popupMenu = new PopupMenu(ReviewerActivity.this, v);
+            // Inflate the menu resource file (we'll define it below)
+            popupMenu.getMenuInflater().inflate(R.menu.menu_folder_options, popupMenu.getMenu());
+
+            // Set a listener for item clicks in the popup menu
+            popupMenu.setOnMenuItemClickListener(item -> {
+                int id = item.getItemId();  // Get the item ID
+                if (id == R.id.rename_option) {
+                    // Handle rename logic here
+                    showRenameDialog(reviewerName);
+                    return true;
+                } else if (id == R.id.delete_option) {
+                    // Handle delete logic here
+                    deleteReviewerFolder(reviewerName);
+                    deleteReviewerFolderFromUI(reviewerName);
+                    return true;
+                } else if (id == R.id.change_color_option) {
+                    // Show a dialog with color options
+                    showColorChangeDialog(reviewerName);
+                    return true;
+                } else {
+                    return false;
+                }
+            });
+
+            // Show the popup menu
+            popupMenu.show();
+        });
+
+        // Add this click listener in the addReviewerFolder method
+        folderItem.setOnClickListener(v -> {
+            // Start FlashcardsActivity and pass the reviewer ID
+            FirebaseUser currentUser = mAuth.getCurrentUser();
+            if (currentUser != null) {
+                String userId = currentUser.getUid(); // Get the current user ID
+                CollectionReference reviewersRef = db.collection("users")
+                        .document(userId)
+                        .collection("reviewer");
+
+                reviewersRef.whereEqualTo("name", reviewerName)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                                for (DocumentSnapshot document : task.getResult()) {
+                                    String reviewerId = document.getId(); // Get the document ID as the reviewer ID
+                                    Intent intent = new Intent(ReviewerActivity.this, FlashcardsActivity.class);
+                                    intent.putExtra("reviewerId", reviewerId); // Pass the reviewer ID to the next activity
+                                    startActivity(intent);
+                                    break;
+                                }
+                            } else {
+                                Toast.makeText(ReviewerActivity.this, "Error: Reviewer not found", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+            }
+        });
+
     }
+
+    private void showColorChangeDialog(String reviewerName) {
+        Dialog colorDialog = new Dialog(this);
+        colorDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        colorDialog.setContentView(R.layout.dialog_change_color);
+
+        RadioGroup colorRadioGroup = colorDialog.findViewById(R.id.colorRadioGroup);
+        Button applyButton = colorDialog.findViewById(R.id.applyColorButton);
+
+        applyButton.setOnClickListener(v -> {
+            int selectedColorId = colorRadioGroup.getCheckedRadioButtonId();
+            RadioButton selectedRadioButton = colorDialog.findViewById(selectedColorId);
+            String color = selectedRadioButton.getText().toString();
+
+            // Apply color to the folder
+            applyColorToFolder(reviewerName, color);
+
+            colorDialog.dismiss();
+        });
+
+        colorDialog.show();
+    }
+
+    private void applyColorToFolder(String reviewerName, String color) {
+        GridLayout folderGrid = findViewById(R.id.folderGrid);
+        int childCount = folderGrid.getChildCount();
+
+        for (int i = 0; i < childCount; i++) {
+            View folderItem = folderGrid.getChildAt(i);
+            TextView folderNameTextView = folderItem.findViewById(R.id.folderNameTextView);
+
+            if (folderNameTextView != null && folderNameTextView.getText().toString().equals(reviewerName)) {
+                // Change the color of the folder icon only
+                int colorCode = getColorCode(color);
+                ImageView folderIcon = folderItem.findViewById(R.id.folderIcon);
+                folderIcon.setColorFilter(colorCode, PorterDuff.Mode.SRC_IN);
+
+                break;
+            }
+        }
+    }
+
+    private int getColorCode(String colorName) {
+        switch (colorName) {
+            case "Red":
+                return Color.RED;
+            case "Green":
+                return Color.GREEN;
+            case "Blue":
+                return Color.BLUE;
+            case "Yellow":
+                return Color.YELLOW;
+            case "Purple":
+                return Color.parseColor("#800080"); // Purple color code
+            default:
+                return Color.WHITE; // Default color
+        }
+    }
+
+    // Show the rename dialog
+    private void showRenameDialog(String oldName) {
+        // Create a dialog for renaming the reviewer
+        Dialog renameDialog = new Dialog(this);
+        renameDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        renameDialog.setContentView(R.layout.dialog_rename_reviewer);
+
+        EditText renameEditText = renameDialog.findViewById(R.id.renameEditText);
+        renameEditText.setText(oldName);
+
+        Button renameButton = renameDialog.findViewById(R.id.renameButton);
+        Button cancelButton = renameDialog.findViewById(R.id.cancelButton);
+
+        // Set click listener for the Rename button
+        renameButton.setOnClickListener(v -> {
+            String newName = renameEditText.getText().toString().trim();
+            if (!newName.isEmpty()) {
+                // Check if the new name already exists
+                if (reviewerNames.contains(newName)) {
+                    Toast.makeText(ReviewerActivity.this, "This name is already taken. Please choose a different one.", Toast.LENGTH_SHORT).show();
+                } else {
+                    // Update the name in Firestore and the UI
+                    updateReviewerName(oldName, newName);
+                    renameDialog.dismiss();
+                }
+            } else {
+                Toast.makeText(ReviewerActivity.this, "Name cannot be empty", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Set click listener for the Cancel button
+        cancelButton.setOnClickListener(v -> renameDialog.dismiss());
+
+        // Show the dialog
+        renameDialog.show();
+    }
+
+
+    // Update reviewer name in Firestore
+    private void updateReviewerName(String oldName, String newName) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            CollectionReference reviewersRef = db.collection("users")
+                    .document(userId)
+                    .collection("reviewer");
+
+            // Find the reviewer by old name and update the name
+            reviewersRef.whereEqualTo("name", oldName)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                // Update the document in Firestore
+                                reviewersRef.document(document.getId())
+                                        .update("name", newName)
+                                        .addOnSuccessListener(aVoid -> {
+                                            // Successfully updated the reviewer name
+                                            Toast.makeText(ReviewerActivity.this, "Reviewer renamed", Toast.LENGTH_SHORT).show();
+
+                                            // Now, update the UI to reflect the new name
+                                            updateReviewerFolderInUI(oldName, newName);
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            // Failed to update the reviewer name
+                                            Toast.makeText(ReviewerActivity.this, "Error renaming reviewer", Toast.LENGTH_SHORT).show();
+                                        });
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void updateReviewerFolderInUI(String oldName, String newName) {
+        GridLayout folderGrid = findViewById(R.id.folderGrid);
+        int childCount = folderGrid.getChildCount();
+
+        for (int i = 0; i < childCount; i++) {
+            View folderItem = folderGrid.getChildAt(i);
+
+            TextView folderNameTextView = folderItem.findViewById(R.id.folderNameTextView);
+            if (folderNameTextView != null && folderNameTextView.getText().toString().equals(oldName)) {
+                // Change folder icon color to green upon rename
+                ImageView folderIcon = folderItem.findViewById(R.id.folderIcon);
+                folderIcon.setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
+
+                // Update the name in the UI
+                folderNameTextView.setText(newName);
+                break;
+            }
+        }
+    }
+
+    // Delete reviewer folder
+    private void deleteReviewerFolder(String reviewerName) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            CollectionReference reviewersRef = db.collection("users")
+                    .document(userId)
+                    .collection("reviewer");
+
+            // Delete the reviewer from Firestore
+            reviewersRef.whereEqualTo("name", reviewerName)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                // Delete the reviewer document
+                                reviewersRef.document(document.getId())
+                                        .delete()
+                                        .addOnSuccessListener(aVoid -> {
+                                            // Successfully deleted the reviewer
+                                            Toast.makeText(ReviewerActivity.this, "Reviewer deleted", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            // Failed to delete the reviewer
+                                            Toast.makeText(ReviewerActivity.this, "Error deleting reviewer", Toast.LENGTH_SHORT).show();
+                                        });
+                            }
+                        }
+                    });
+        }
+    }
+
+    private void deleteReviewerFolderFromUI(String reviewerName) {
+        GridLayout folderGrid = findViewById(R.id.folderGrid);
+        int childCount = folderGrid.getChildCount();
+
+        for (int i = 0; i < childCount; i++) {
+            View folderItem = folderGrid.getChildAt(i);
+            TextView folderNameTextView = folderItem.findViewById(R.id.folderNameTextView);
+
+            if (folderNameTextView != null && folderNameTextView.getText().toString().equals(reviewerName)) {
+                folderGrid.removeViewAt(i); // Remove the folder from the GridLayout
+                break;
+            }
+        }
+    }
+    private void fetchReviewersFromFirestore() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid(); // Get the current user ID
+            CollectionReference reviewersRef = db.collection("users")
+                    .document(userId)
+                    .collection("reviewer");
+
+            reviewersRef.get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                String reviewerName = document.getString("name");
+                                if (reviewerName != null) {
+                                    // Add each reviewer to the UI
+                                    addReviewerFolder(reviewerName);
+                                    // You can also add other data, e.g., description, from the document if needed
+                                }
+                            }
+                        } else {
+                            Toast.makeText(ReviewerActivity.this, "No reviewers found", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w("Firestore", "Error getting documents", e);
+                        Toast.makeText(ReviewerActivity.this, "Error loading reviewers", Toast.LENGTH_SHORT).show();
+                    });
+        } else {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 }

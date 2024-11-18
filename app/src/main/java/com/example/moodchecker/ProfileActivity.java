@@ -1,5 +1,6 @@
 package com.example.moodchecker;
 
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.moodchecker.model.User;
+import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -32,6 +34,7 @@ public class ProfileActivity extends AppCompatActivity {
     private LinearLayout idCardSection;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+    private ImageView profileAvatar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +67,8 @@ public class ProfileActivity extends AppCompatActivity {
         avatarOption8 = findViewById(R.id.avatarOption8);
         avatarOption9 = findViewById(R.id.avatarOption9);
         avatarOption10 = findViewById(R.id.avatarOption10);
+
+        profileAvatar = findViewById(R.id.profileAvatar);
 
         // Set click listeners for color options
         colorOption1.setOnClickListener(view -> updateColor("#A3E4D7"));
@@ -192,48 +197,66 @@ public class ProfileActivity extends AppCompatActivity {
                     Toast.makeText(ProfileActivity.this, "Error loading profile data", Toast.LENGTH_SHORT).show();
                 });
 
+//        db.collection("users").document(userId)
+//                .get()
+//                .addOnSuccessListener(documentSnapshot -> {
+//                    if (documentSnapshot.exists()) {
+//                        String avatar = documentSnapshot.getString("avatar");
+//                        if (avatar != null) {
+//                            switch (avatar) {
+//                                case "avatar1":
+//                                    updateAvatar(1);
+//                                    break;
+//                                case "avatar2":
+//                                    updateAvatar(2);
+//                                    break;
+//                                case "avatar3":
+//                                    updateAvatar(3);
+//                                    break;
+//                                case "avatar4":
+//                                    updateAvatar(4);
+//                                    break;
+//                                case "avatar5":
+//                                    updateAvatar(5);
+//                                    break;
+//                                case "avatar6":
+//                                    updateAvatar(6);
+//                                    break;
+//                                case "avatar7":
+//                                    updateAvatar(7);
+//                                    break;
+//                                case "avatar8":
+//                                    updateAvatar(8);
+//                                    break;
+//                                case "avatar9":
+//                                    updateAvatar(9);
+//                                    break;
+//                                case "avatar10":
+//                                    updateAvatar(10);
+//                                    break;
+//                            }
+//                        }
+//                    }
+//                })
+//                .addOnFailureListener(e -> Log.e("ProfileActivity", "Failed to load user profile", e));
         db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
                     if (documentSnapshot.exists()) {
-                        String avatar = documentSnapshot.getString("avatar");
-                        if (avatar != null) {
-                            switch (avatar) {
-                                case "avatar1":
-                                    updateAvatar(1);
-                                    break;
-                                case "avatar2":
-                                    updateAvatar(2);
-                                    break;
-                                case "avatar3":
-                                    updateAvatar(3);
-                                    break;
-                                case "avatar4":
-                                    updateAvatar(4);
-                                    break;
-                                case "avatar5":
-                                    updateAvatar(5);
-                                    break;
-                                case "avatar6":
-                                    updateAvatar(6);
-                                    break;
-                                case "avatar7":
-                                    updateAvatar(7);
-                                    break;
-                                case "avatar8":
-                                    updateAvatar(8);
-                                    break;
-                                case "avatar9":
-                                    updateAvatar(9);
-                                    break;
-                                case "avatar10":
-                                    updateAvatar(10);
-                                    break;
-                            }
+                        String avatarName = documentSnapshot.getString("avatar");
+                        if (avatarName != null && !avatarName.isEmpty()) {
+                            loadAvatarFromDrawable(avatarName);
+                        } else {
+                            // Use default avatar if the avatar field is null or empty
+                            profileAvatar.setImageResource(R.drawable.avatar1);
                         }
                     }
                 })
-                .addOnFailureListener(e -> Log.e("ProfileActivity", "Failed to load user profile", e));
+                .addOnFailureListener(e -> {
+                    Log.e("ProfileActivity", "Failed to load profile data", e);
+                    // Use default avatar in case of failure
+                    profileAvatar.setImageResource(R.drawable.avatar1);
+                });
     }
 
     private void updateColor(String color) {
@@ -269,8 +292,15 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void updateAvatar(int avatarIndex) {
         String selectedAvatar = "avatar" + avatarIndex;
+
+        // Update the profile avatar dynamically
+        int avatarResourceId = getResources().getIdentifier(selectedAvatar, "drawable", getPackageName());
+        profileAvatar.setImageResource(avatarResourceId);
+
         // Save the selected avatar to Firestore or SharedPreferences
         saveAvatarToDatabase(selectedAvatar);
+
+        highlightSelectedAvatar(avatarIndex);
 
         // Provide feedback (e.g., highlight the selected avatar)
         switch (avatarIndex) {
@@ -398,6 +428,23 @@ public class ProfileActivity extends AppCompatActivity {
         }
     }
 
+    private void highlightSelectedAvatar(int avatarIndex) {
+        ImageView[] avatars = {
+                avatarOption1, avatarOption2, avatarOption3, avatarOption4, avatarOption5,
+                avatarOption6, avatarOption7, avatarOption8, avatarOption9, avatarOption10
+        };
+
+        // Reset all avatar borders
+        for (ImageView avatar : avatars) {
+            avatar.setBackgroundResource(0); // Remove any applied border
+        }
+
+        // Highlight the selected avatar
+        if (avatarIndex > 0 && avatarIndex <= avatars.length) {
+            avatars[avatarIndex - 1].setBackgroundResource(R.drawable.selected_border);
+        }
+    }
+
     private void saveAvatarToDatabase(String avatarName) {
         String userId = mAuth.getCurrentUser().getUid();
         Map<String, Object> updates = new HashMap<>();
@@ -407,6 +454,25 @@ public class ProfileActivity extends AppCompatActivity {
                 .update(updates)
                 .addOnSuccessListener(aVoid -> Toast.makeText(this, "Avatar updated!", Toast.LENGTH_SHORT).show())
                 .addOnFailureListener(e -> Log.e("ProfileActivity", "Failed to update avatar", e));
+    }
+
+    private void loadAvatarFromDrawable(String avatarName) {
+        try {
+            // Get the resource ID of the drawable by name
+            Resources res = getResources();
+            int resourceId = res.getIdentifier(avatarName, "drawable", getPackageName());
+
+            // Check if the resource exists
+            if (resourceId != 0) {
+                profileAvatar.setImageResource(resourceId);
+            } else {
+                // Fallback to a default image if the resource is not found
+                profileAvatar.setImageResource(R.drawable.avatar1);
+            }
+        } catch (Exception e) {
+            Log.e("ProfileActivity", "Error loading avatar", e);
+            profileAvatar.setImageResource(R.drawable.avatar1);
+        }
     }
 
     // Optional: Save changes to Firestore when the user edits their profile

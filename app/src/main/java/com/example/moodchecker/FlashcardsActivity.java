@@ -2,6 +2,7 @@ package com.example.moodchecker;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -16,6 +17,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.moodchecker.adapter.FlashcardAdapter;
 import com.example.moodchecker.model.Flashcard;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +52,9 @@ public class FlashcardsActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.flashcardsRecyclerView);
         Button addFlashcardButton = findViewById(R.id.addFlashcardButton);
         Button viewFlashcardsButton = findViewById(R.id.viewFlashcardsButton);
+
+        // Get the reviewer ID from the Intent
+        String reviewerId = getIntent().getStringExtra("reviewerId");
 
         // Setup RecyclerView with the adapter
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -119,15 +129,42 @@ public class FlashcardsActivity extends AppCompatActivity {
                     newFlashcard.setCorrectAnswer(correctAnswer);  // Set the correct answer
                     flashcards.add(newFlashcard);
 
+
                     // Notify the adapter to update the RecyclerView
                     adapter.notifyDataSetChanged();
 
-                    // Clear the input fields after adding the flashcard
-                    questionInput.setText("");
-                    answerInput.setText("");
-                    shortTextInput.setText("");  // Clear short text input
+//                    // Clear the input fields after adding the flashcard
+//                    questionInput.setText("");
+//                    answerInput.setText("");
+//                    shortTextInput.setText("");  // Clear short text input
+//
+//                    Toast.makeText(this, "Flashcard added", Toast.LENGTH_SHORT).show();
 
-                    Toast.makeText(this, "Flashcard added", Toast.LENGTH_SHORT).show();
+                    // Firestore reference
+                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Assuming you're using Firebase Auth
+                    DocumentReference flashcardsRef = db.collection("users")
+                            .document(userId)
+                            .collection("reviewers")
+                            .document(reviewerId)
+                            .collection("flashcards")
+                            .document();
+
+                    flashcardsRef.set(newFlashcard)
+                            .addOnSuccessListener(aVoid -> {
+                                flashcards.add(newFlashcard);  // Add to local list
+                                adapter.notifyDataSetChanged(); // Update UI
+
+                                // Clear input fields
+                                questionInput.setText("");
+                                answerInput.setText("");
+                                shortTextInput.setText("");
+
+                                Toast.makeText(this, "Flashcard added successfully", Toast.LENGTH_SHORT).show();
+                            })
+                            .addOnFailureListener(e -> {
+                                Toast.makeText(this, "Failed to save flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                            });
 
                 } else {
                     Toast.makeText(this, "Please enter a question and answer", Toast.LENGTH_SHORT).show();
@@ -139,13 +176,150 @@ public class FlashcardsActivity extends AppCompatActivity {
             }
         });
 
-
-
         // Navigate to view flashcards page
         viewFlashcardsButton.setOnClickListener(view -> {
             Intent intent = new Intent(FlashcardsActivity.this, ViewFlashcardsActivity.class);
             intent.putExtra("flashcardsList", (ArrayList<Flashcard>) flashcards);
             startActivity(intent);
         });
+
+        if (reviewerId == null || reviewerId.isEmpty()) {
+            Toast.makeText(this, "Reviewer ID is missing!", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userId = mAuth.getCurrentUser().getUid();
+
+        // Firestore reference to the reviewer's flashcards
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CollectionReference flashcardsRef = db.collection("users")
+                .document(userId)
+                .collection("reviewer")
+                .document(reviewerId)
+                .collection("flashcards");
+
+        // Initialize RecyclerView and FlashcardAdapter
+        flashcards = new ArrayList<>();
+        recyclerView = findViewById(R.id.flashcardsRecyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        adapter = new FlashcardAdapter(flashcards);
+        recyclerView.setAdapter(adapter);
+
+        // Load flashcards from Firestore
+        loadFlashcards(flashcardsRef);
+
+        // Add Flashcard Button
+//        findViewById(R.id.addFlashcardButton).setOnClickListener(view -> addFlashcard(flashcardsRef));
+        findViewById(R.id.addFlashcardButton).setOnClickListener(view -> {
+            String question = questionInput.getText().toString().trim();
+            String answer = selectedAnswerType.equals("Short Text")
+                    ? shortTextInput.getText().toString().trim()
+                    : answerInput.getText().toString().trim();
+
+            if (!question.isEmpty() && !answer.isEmpty()) {
+                List<String> options = new ArrayList<>();
+
+                if (selectedAnswerType.equals("Multiple Choice")) {
+                    String[] optionArray = answer.split(",");
+                    for (String option : optionArray) {
+                        options.add(option.trim());
+                    }
+                } else {
+                    options.add(answer); // For short text, the answer itself is the only option
+                }
+
+                addFlashcard(question, answer, selectedAnswerType, options); // Pass the parameters
+            } else {
+                Toast.makeText(this, "Please fill in all required fields", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+        // View Flashcards Button
+        findViewById(R.id.viewFlashcardsButton).setOnClickListener(view -> {
+            Intent intent = new Intent(FlashcardsActivity.this, ViewFlashcardsActivity.class);
+            intent.putExtra("flashcardsList", (ArrayList<Flashcard>) flashcards);
+            startActivity(intent);
+        });
     }
+
+//    private void loadFlashcards(CollectionReference flashcardsRef) {
+//        flashcardsRef.addSnapshotListener((querySnapshot, e) -> {
+//            if (e != null) {
+//                Log.e("FlashcardsActivity", "Error loading flashcards", e);
+//                return;
+//            }
+//
+//            if (querySnapshot != null) {
+//                flashcards.clear();
+//                for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+//                    Flashcard flashcard = document.toObject(Flashcard.class);
+//                    flashcards.add(flashcard);
+//                }
+//                adapter.notifyDataSetChanged();
+//            }
+//        });
+
+    private void loadFlashcards(CollectionReference flashcardsRef) {
+        flashcardsRef.get()
+                .addOnSuccessListener(querySnapshot -> {
+                    Log.d("FlashcardsActivity", "Loaded flashcards: " + querySnapshot.size());
+
+                    // Clear the current list to avoid duplication
+                    flashcards.clear();
+
+                    // Process the documents and convert them to Flashcard objects
+                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        Flashcard flashcard = document.toObject(Flashcard.class);
+                        flashcards.add(flashcard);
+                        Log.d("FlashcardsActivity", "Flashcard: " + flashcard.getQuestion());
+                    }
+
+                    // Notify the adapter to refresh the RecyclerView
+                    adapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FlashcardsActivity", "Error loading flashcards", e);
+                    Toast.makeText(this, "Failed to load flashcards: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void addFlashcard(String question, String answer, String answerType, List<String> options) {
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid(); // Get the current user's ID
+            String reviewerId = getIntent().getStringExtra("reviewerId"); // Get the reviewer ID from Intent
+
+            if (reviewerId == null) {
+                Toast.makeText(this, "Error: Reviewer ID is missing", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            CollectionReference flashcardsRef = db.collection("users")
+                    .document(userId)
+                    .collection("reviewer")
+                    .document(reviewerId)
+                    .collection("flashcards");
+
+            // Create a new flashcard object
+            Flashcard flashcard = new Flashcard(question, answer, answerType, options);
+
+            // Save the flashcard to Firestore
+            flashcardsRef.add(flashcard)
+                    .addOnSuccessListener(documentReference -> {
+                        Toast.makeText(this, "Flashcard added successfully!", Toast.LENGTH_SHORT).show();
+                        loadFlashcards(flashcardsRef);
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Error adding flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        } else {
+            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+
 }

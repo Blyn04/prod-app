@@ -56,12 +56,12 @@
         android:layout_centerHorizontal="true">
 
         <!-- Folder Items -->
-        <include layout="@layout/folder_item" />
-        <include layout="@layout/folder_item" />
-        <include layout="@layout/folder_item" />
-        <include layout="@layout/folder_item" />
-        <include layout="@layout/folder_item" />
-        <include layout="@layout/folder_item" />
+<!--        <include layout="@layout/folder_item" />-->
+<!--        <include layout="@layout/folder_item" />-->
+<!--        <include layout="@layout/folder_item" />-->
+<!--        <include layout="@layout/folder_item" />-->
+<!--        <include layout="@layout/folder_item" />-->
+<!--        <include layout="@layout/folder_item" />-->
 
     </GridLayout>
 

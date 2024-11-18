@@ -22,5 +22,14 @@
         android:textSize="14sp"
         android:layout_marginTop="4dp"
         android:gravity="center" />
-</LinearLayout>
 
+    <!-- 3 Dots Icon (Overflow Menu) -->
+    <ImageView
+        android:id="@+id/moreOptionsIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_more"
+        android:contentDescription="More options"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="end" />
+</LinearLayout>
