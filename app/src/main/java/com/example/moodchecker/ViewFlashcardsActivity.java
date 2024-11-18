@@ -91,6 +91,7 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         submitButton.setOnClickListener(view -> {
             Flashcard flashcard = flashcards.get(currentIndex);
             String correctAnswer = flashcard.getCorrectAnswer();
+            String answer = flashcard.getAnswer();
 
             if (flashcard.isAnswered() && flashcard.isCorrect()) {
                 // Don't allow resubmission if the answer was correct
@@ -106,42 +107,78 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
                         streakCount++;
                         flashcard.setCorrect(true); // Mark as correct
                         saveStreakToFirebase(streakCount);
+
+                        flashcard.setAnswered(true);
+                        updateStreakDisplay();
+
+                        goToNextQuestion();
+
                         Toast.makeText(ViewFlashcardsActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
                     } else {
                         streakCount = 0;
                         flashcard.setCorrect(false); // Mark as incorrect
                         saveStreakToFirebase(streakCount);
+
+                        updateStreakDisplay();
+                        flashcard.setAnswered(true);
+
                         Toast.makeText(ViewFlashcardsActivity.this, "Incorrect. The correct answer is: " + correctAnswer, Toast.LENGTH_SHORT).show();
                     }
-                    flashcard.setAnswered(true);
-                    updateStreakDisplay();
+//                    flashcard.setAnswered(true);
+//                    updateStreakDisplay();
+
                 } else {
                     Toast.makeText(ViewFlashcardsActivity.this, "Please select an answer.", Toast.LENGTH_SHORT).show();
                 }
+
             } else if (flashcard.getAnswerType().equals("Short Text")) {
                 EditText shortTextInput = findViewById(R.id.shortTextInput);
                 String userAnswer = shortTextInput.getText().toString().trim();
 
                 if (!userAnswer.isEmpty()) {
-                    if (userAnswer.equalsIgnoreCase(correctAnswer)) {
+                    if (userAnswer.equalsIgnoreCase(answer)) {
                         streakCount++;
                         flashcard.setCorrect(true); // Mark as correct
                         saveStreakToFirebase(streakCount);
+
+                        flashcard.setAnswered(true);
+                        updateStreakDisplay();
+                        goToNextQuestion();
+
                         Toast.makeText(ViewFlashcardsActivity.this, "Correct!", Toast.LENGTH_SHORT).show();
+
                     } else {
                         streakCount = 0;
                         flashcard.setCorrect(false); // Mark as incorrect
                         saveStreakToFirebase(streakCount);
-                        Toast.makeText(ViewFlashcardsActivity.this, "Incorrect. The correct answer is: " + correctAnswer, Toast.LENGTH_SHORT).show();
+
+                        updateStreakDisplay();
+                        flashcard.setAnswered(true);
+
+                        Toast.makeText(ViewFlashcardsActivity.this, "Incorrect. The correct answer is: " + answer, Toast.LENGTH_SHORT).show();
                     }
-                    flashcard.setAnswered(true);
-                    updateStreakDisplay();
+//                    flashcard.setAnswered(true);
+//                    updateStreakDisplay();
                 } else {
                     Toast.makeText(ViewFlashcardsActivity.this, "Please enter an answer.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
     }
+
+    private void goToNextQuestion() {
+        if (currentIndex < flashcards.size() - 1) {
+            currentIndex++;
+            Flashcard flashcard = flashcards.get(currentIndex);
+            flashcard.setAnswered(false); // Reset the answer status for the new question
+            flashcard.setCorrect(false);  // Reset correctness
+            displayFlashcard(currentIndex); // Display the next question
+        } else {
+            // If no more questions, show a message or finish the activity
+            Toast.makeText(ViewFlashcardsActivity.this, "You've completed all the questions!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
 
     private void displayFlashcard(int index) {
         if (index < flashcards.size()) {

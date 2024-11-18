@@ -107,6 +107,7 @@ public class FlashcardsActivity extends AppCompatActivity {
 
                 if (isDuplicate) {
                     Toast.makeText(this, "This question already exists. Please enter a unique question.", Toast.LENGTH_SHORT).show();
+
                 } else if (!question.isEmpty() && !answer.isEmpty()) {
                     List<String> options = new ArrayList<>();
                     String correctAnswer = "";
@@ -117,7 +118,8 @@ public class FlashcardsActivity extends AppCompatActivity {
                         for (String option : optionArray) {
                             options.add(option.trim());
                         }
-                        correctAnswer = "yes";  // Hardcoded correct answer for now (could be dynamic based on user input)
+                        // correctAnswer = "yes";  Hardcoded correct answer for now (could be dynamic based on user input)
+                        correctAnswer = options.get(0);
 
                     } else {
                         options.add(answer);  // For short text questions, the answer is the correct one
@@ -126,7 +128,7 @@ public class FlashcardsActivity extends AppCompatActivity {
 
                     // Create a new Flashcard and add it to the list
                     Flashcard newFlashcard = new Flashcard(question, answer, selectedAnswerType, options);
-                    newFlashcard.setCorrectAnswer(correctAnswer);  // Set the correct answer
+                    newFlashcard.setCorrectAnswer(answer);  // Set the correct answer
                     flashcards.add(newFlashcard);
 
 
@@ -226,6 +228,7 @@ public class FlashcardsActivity extends AppCompatActivity {
                     for (String option : optionArray) {
                         options.add(option.trim());
                     }
+
                 } else {
                     options.add(answer); // For short text, the answer itself is the only option
                 }
@@ -236,31 +239,56 @@ public class FlashcardsActivity extends AppCompatActivity {
             }
         });
 
-
         // View Flashcards Button
         findViewById(R.id.viewFlashcardsButton).setOnClickListener(view -> {
             Intent intent = new Intent(FlashcardsActivity.this, ViewFlashcardsActivity.class);
             intent.putExtra("flashcardsList", (ArrayList<Flashcard>) flashcards);
             startActivity(intent);
         });
-    }
 
-//    private void loadFlashcards(CollectionReference flashcardsRef) {
-//        flashcardsRef.addSnapshotListener((querySnapshot, e) -> {
-//            if (e != null) {
-//                Log.e("FlashcardsActivity", "Error loading flashcards", e);
-//                return;
-//            }
-//
-//            if (querySnapshot != null) {
-//                flashcards.clear();
-//                for (DocumentSnapshot document : querySnapshot.getDocuments()) {
-//                    Flashcard flashcard = document.toObject(Flashcard.class);
-//                    flashcards.add(flashcard);
-//                }
-//                adapter.notifyDataSetChanged();
-//            }
-//        });
+        adapter.setDeleteCallback((flashcard, position) -> {
+            FirebaseFirestore dbs = FirebaseFirestore.getInstance();
+            FirebaseAuth mAuths = FirebaseAuth.getInstance();
+
+            String userIds = mAuths.getCurrentUser().getUid();
+            if (userId == null || reviewerId == null) {
+                Toast.makeText(this, "User or Reviewer ID is missing!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            CollectionReference flashcardsRefs = dbs.collection("users")
+                    .document(userIds)
+                    .collection("reviewer")
+                    .document(reviewerId)
+                    .collection("flashcards");
+
+            // Query Firestore for the document to delete
+            flashcardsRefs.whereEqualTo("question", flashcard.getQuestion())
+                    .whereEqualTo("answer", flashcard.getAnswer())
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                                document.getReference().delete()
+                                        .addOnSuccessListener(aVoid -> {
+                                            // Remove the item from the RecyclerView list
+                                            flashcards.remove(position);
+                                            adapter.notifyItemRemoved(position);
+                                            Toast.makeText(this, "Flashcard deleted", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(this, "Failed to delete flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        });
+                            }
+                        } else {
+                            Toast.makeText(this, "Flashcard not found in Firestore", Toast.LENGTH_SHORT).show();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(this, "Failed to query Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        });
+    }
 
     private void loadFlashcards(CollectionReference flashcardsRef) {
         flashcardsRef.get()

@@ -96,14 +96,16 @@
                     android:layout_height="wrap_content"
                     android:text="Back"
                     android:layout_marginEnd="16dp"
-                    android:backgroundTint="#D3D3D3" />
+                    android:backgroundTint="#D3D3D3"
+                    android:visibility="gone"/>
 
                 <Button
                     android:id="@+id/nextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Next"
-                    android:backgroundTint="#A1E58B" />
+                    android:backgroundTint="#A1E58B"
+                    android:visibility="gone"/>
 
                 <!-- Submit Button -->
                 <Button

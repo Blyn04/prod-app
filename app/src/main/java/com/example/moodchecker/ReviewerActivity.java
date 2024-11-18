@@ -125,6 +125,7 @@ public class ReviewerActivity extends AppCompatActivity {
 
     private void addReviewerToFirestore(String name, String description) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
+
         if (currentUser != null) {
             String userId = currentUser.getUid();  // Get current user ID
             CollectionReference reviewersRef = db.collection("users")
@@ -142,6 +143,7 @@ public class ReviewerActivity extends AppCompatActivity {
                         // Failed to add reviewer
                         Log.w("Firestore", "Error adding reviewer", e);
                     });
+
         } else {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
         }
@@ -239,15 +241,48 @@ public class ReviewerActivity extends AppCompatActivity {
         applyButton.setOnClickListener(v -> {
             int selectedColorId = colorRadioGroup.getCheckedRadioButtonId();
             RadioButton selectedRadioButton = colorDialog.findViewById(selectedColorId);
-            String color = selectedRadioButton.getText().toString();
 
-            // Apply color to the folder
-            applyColorToFolder(reviewerName, color);
+            if (selectedRadioButton != null) {
+                String color = selectedRadioButton.getText().toString(); // Get color name (e.g., "Red")
+                saveColorToFirestore(reviewerName, color); // Save the color to Firestore
+            }
 
             colorDialog.dismiss();
         });
 
         colorDialog.show();
+    }
+
+    private void saveColorToFirestore(String reviewerName, String color) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            CollectionReference reviewersRef = db.collection("users")
+                    .document(userId)
+                    .collection("reviewer");
+
+            // Find the reviewer by name and update the color
+            reviewersRef.whereEqualTo("name", reviewerName)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                String documentId = document.getId();
+
+                                // Update the color field in Firestore
+                                reviewersRef.document(documentId)
+                                        .update("color", color)
+                                        .addOnSuccessListener(aVoid -> {
+                                            Toast.makeText(ReviewerActivity.this, "Color updated", Toast.LENGTH_SHORT).show();
+                                            applyColorToFolder(reviewerName, color); // Reflect the color in the UI
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(ReviewerActivity.this, "Failed to update color", Toast.LENGTH_SHORT).show();
+                                        });
+                            }
+                        }
+                    });
+        }
     }
 
     private void applyColorToFolder(String reviewerName, String color) {
@@ -438,10 +473,13 @@ public class ReviewerActivity extends AppCompatActivity {
                         if (task.isSuccessful() && !task.getResult().isEmpty()) {
                             for (DocumentSnapshot document : task.getResult()) {
                                 String reviewerName = document.getString("name");
+                                String color = document.getString("color");
                                 if (reviewerName != null) {
                                     // Add each reviewer to the UI
                                     addReviewerFolder(reviewerName);
-                                    // You can also add other data, e.g., description, from the document if needed
+                                    if (color != null) {
+                                        applyColorToFolder(reviewerName, color); // Apply saved color
+                                    }
                                 }
                             }
                         } else {

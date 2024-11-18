@@ -3,6 +3,7 @@ package com.example.moodchecker.model;
 public class Reviewer {
     private String name;
     private String description;
+    private String color;
 
     // Default constructor required for Firestore serialization
     public Reviewer() {
@@ -23,4 +24,14 @@ public class Reviewer {
     public String getDescription() {
         return description;
     }
+
+    // Getter for color
+//    public String getColor() {
+//        return color;
+//    }
+//
+//    // Setter for color
+//    public void setColor(String color) {
+//        this.color = color;
+//    }
 }
