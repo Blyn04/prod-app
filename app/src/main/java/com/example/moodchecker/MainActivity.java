@@ -15,15 +15,71 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
     private TextView dateTextView;
     private TextView moodQuestion;
     private MediaPlayer mediaPlayer;
     private DatabaseReference databaseReference;
+
+    private final List<String> tiredMessages = Arrays.asList(
+            "Feeling tired? It's okay to pause. Even a short break can recharge your mind and body.",
+            "Exhausted? Remember, rest isn’t a luxury—it’s a necessity. Take time for yourself.",
+            "You’ve been working so hard! Don’t forget to breathe and give yourself some downtime.",
+            "It’s natural to feel worn out. Grab some water, stretch, and refocus when you’re ready.",
+            "Fatigue catching up? Prioritize sleep and relaxation—you deserve it.",
+            "Sometimes the best thing you can do is stop, rest, and recharge. You've earned it!",
+            "Tiredness is a sign to slow down. Listen to your body and let it recover.",
+            "Your hard work is admirable, but balance is key. Rest now so you can thrive later.",
+            "Even superheroes need rest. Take it easy, and let yourself unwind.",
+            "Burnout isn’t worth it. Rest today so you can shine tomorrow."
+    );
+
+    private final List<String> happyMessages = Arrays.asList(
+            "Happiness looks amazing on you! Keep the positivity flowing and make today unforgettable.",
+            "Your smile is shining bright! Treasure this joyful moment and share it with others.",
+            "Feeling happy is a gift. Celebrate it and let it uplift your day even more.",
+            "Keep riding this wave of joy! Moments like this are what life’s all about.",
+            "Happiness is contagious—spread it far and wide! You never know who might need it.",
+            "This kind of positivity is worth celebrating. Hold on to it and enjoy every bit of it.",
+            "You’re glowing with good vibes! Take a moment to appreciate what’s making you smile.",
+            "Happiness is energy—use it to power through your goals and inspire others!",
+            "Smiling suits you! Enjoy this moment and create memories you’ll cherish.",
+            "You’ve found your happy place. Stay there as long as you can!"
+    );
+
+    private final List<String> sickMessages = Arrays.asList(
+            "Rest up and take it easy. Your health is your top priority right now.",
+            "Not feeling your best? That’s okay—allow yourself the time to heal and recover.",
+            "You’re strong, but even the strongest need rest. Take care of yourself!",
+            "Feeling sick can be tough, but this is your body’s way of asking for a break.",
+            "Sending you warm wishes for a speedy recovery. Take all the rest you need!",
+            "Listen to your body and don’t push yourself. You’ll feel better soon.",
+            "Healing takes time—focus on resting and getting better day by day.",
+            "Don’t forget to stay hydrated and nourished while you rest. You’ve got this!",
+            "Even a small step toward recovery is progress. Hang in there—you’re on the mend.",
+            "Take a deep breath and let yourself heal. You’ll feel like yourself again soon."
+    );
+
+    private final List<String> calmMessages = Arrays.asList(
+            "Peaceful moments are precious. Take a deep breath and savor this calmness.",
+            "Feeling calm is like hitting the reset button. Use it to focus and recharge.",
+            "A calm mind can accomplish great things. Stay centered and trust the process.",
+            "In this quiet moment, find strength and clarity to take on what’s next.",
+            "Calmness brings perspective. Use this time to reflect and realign with your goals.",
+            "Peace is a rare treasure—hold onto it and let it ground you.",
+            "The calm you feel now can be your anchor through anything. Cherish it.",
+            "Moments like these are for you to enjoy. Stay present and let the world fade away.",
+            "Calmness is contagious. Share it with those around you and create harmony.",
+            "This peaceful energy is your superpower. Let it guide you through your day."
+    );
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,13 +96,13 @@ public class MainActivity extends AppCompatActivity {
         dateTextView.setText(currentDate);
 
         // Set up mood buttons
-        setupMoodButton(R.id.sleepyButton, "Tired", R.raw.yawns, "Looks like you've been working hard! Remember to take breaks and stay hydrated. A quick walk or some deep breaths can help refresh you.");
-        setupMoodButton(R.id.sickButton, "Sick", R.raw.sneeze, "Sorry, you're not feeling well. Rest as much as possible and don’t push yourself too hard. Your health comes first!");
-        setupMoodButton(R.id.calmButton, "Calm", R.raw.sparkle, "Feeling calm is a gift! Use this moment to focus and enjoy a productive, peaceful study session. Stay grounded and keep up the great work.");
-        setupMoodButton(R.id.happyButton, "Happy", R.raw.horn, "We’re glad to see you’re feeling great! Keep that positive energy going and spread it to those around you. If something made your day, keep it close to heart!");
+        setupMoodButton(R.id.sleepyButton, "Tired", R.raw.yawns, tiredMessages);
+        setupMoodButton(R.id.sickButton, "Sick", R.raw.sneeze, sickMessages);
+        setupMoodButton(R.id.calmButton, "Calm", R.raw.sparkle, calmMessages);
+        setupMoodButton(R.id.happyButton, "Happy", R.raw.horn, happyMessages);
     }
 
-    private void setupMoodButton(int buttonId, final String mood, final int soundResourceId, final String moodMessage) {
+    private void setupMoodButton(int buttonId, final String mood, final int soundResourceId, final List<String> moodMessages) {
         Button button = findViewById(buttonId);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -54,12 +110,19 @@ public class MainActivity extends AppCompatActivity {
                 playSound(soundResourceId);
                 saveMoodToFirestore(mood);
 
+                String moodMessage = getRandomMessage(moodMessages);
+
                 Intent intent = new Intent(MainActivity.this, MoodPage.class);
                 intent.putExtra("selectedMood", mood);
                 intent.putExtra("moodMessage", moodMessage);
                 startActivity(intent);
             }
         });
+    }
+
+    private String getRandomMessage(List<String> messages) {
+        Random random = new Random();
+        return messages.get(random.nextInt(messages.size()));
     }
 
     private void playSound(int soundResourceId) {
