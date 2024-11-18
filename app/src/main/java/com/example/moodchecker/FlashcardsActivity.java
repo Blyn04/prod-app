@@ -91,10 +91,107 @@ public class FlashcardsActivity extends AppCompatActivity {
             }
         });
 
+//        addFlashcardButton.setOnClickListener(view -> {
+//            if (flashcards.size() < 100) {
+//                String question = questionInput.getText().toString();
+//                String answer = selectedAnswerType.equals("Short Text") ? shortTextInput.getText().toString() : answerInput.getText().toString();
+//
+//                // Check if the question already exists in the list
+//                boolean isDuplicate = false;
+//                for (Flashcard flashcard : flashcards) {
+//                    if (flashcard.getQuestion().equalsIgnoreCase(question)) {
+//                        isDuplicate = true;
+//                        break;
+//                    }
+//                }
+//
+//                if (isDuplicate) {
+//                    Toast.makeText(this, "This question already exists. Please enter a unique question.", Toast.LENGTH_SHORT).show();
+//
+//                } else if (!question.isEmpty() && !answer.isEmpty()) {
+//                    List<String> options = new ArrayList<>();
+//                    String correctAnswer = "";
+//
+//                    // For Multiple Choice questions, split options by commas
+//                    if (selectedAnswerType.equals("Multiple Choice")) {
+//                        String[] optionArray = answer.split(",");
+//                        List<String> cleanedOptions = new ArrayList<>();
+//
+//                        for (String option : optionArray) {
+//                            String trimmedOption = option.trim();
+//                            if (!trimmedOption.isEmpty()) {
+//                                cleanedOptions.add(trimmedOption);
+//                            }
+//                        }
+//
+//                        // Immediately check if there are more than 3 options
+//                        if (cleanedOptions.size() > 3) {
+//                            Toast.makeText(this, "You can only provide up to 3 options for multiple choice.", Toast.LENGTH_SHORT).show();
+//                            answerInput.setText("");
+//                            return;  // Exit the function if there are more than 3 valid options
+//                        }
+//
+//                        // Add valid options to the list
+//                        options.addAll(cleanedOptions);
+//                        correctAnswer = options.get(0);  // Set the correct answer (first option)
+//
+//                    } else {
+//                        options.add(answer);  // For short text questions, the answer is the correct one
+//                        correctAnswer = answer;
+//                    }
+//
+//                    // Create a new Flashcard and add it to the list
+//                    Flashcard newFlashcard = new Flashcard(question, answer, selectedAnswerType, options);
+//                    newFlashcard.setCorrectAnswer(answer);  // Set the correct answer
+//                    flashcards.add(newFlashcard);
+//
+//
+//                    // Notify the adapter to update the RecyclerView
+//                    adapter.notifyDataSetChanged();
+//
+//                    // Firestore reference
+//                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+//                    String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Assuming you're using Firebase Auth
+//                    DocumentReference flashcardsRef = db.collection("users")
+//                            .document(userId)
+//                            .collection("reviewer")
+//                            .document(reviewerId)
+//                            .collection("flashcards")
+//                            .document();
+//
+//                    flashcardsRef.set(newFlashcard)
+//                            .addOnSuccessListener(aVoid -> {
+//                                flashcards.add(newFlashcard);  // Add to local list
+//                                adapter.notifyDataSetChanged(); // Update UI
+//
+//                                Toast.makeText(this, "Flashcard added successfully", Toast.LENGTH_SHORT).show();
+//
+//                                // Clear input fields
+//                                questionInput.setText("");
+//                                answerInput.setText("");
+//                                shortTextInput.setText("");
+//                            })
+//
+//                            .addOnFailureListener(e -> {
+//                                Toast.makeText(this, "Failed to save flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                            });
+//
+//                } else {
+//                    Toast.makeText(this, "Please enter a question and answer", Toast.LENGTH_SHORT).show();
+//                }
+//
+//            } else {
+//                // If the number of flashcards exceeds 100, show a warning
+//                Toast.makeText(this, "You can only add up to 100 flashcards", Toast.LENGTH_SHORT).show();
+//            }
+//        });
+
         addFlashcardButton.setOnClickListener(view -> {
             if (flashcards.size() < 100) {
-                String question = questionInput.getText().toString();
-                String answer = selectedAnswerType.equals("Short Text") ? shortTextInput.getText().toString() : answerInput.getText().toString();
+                String question = questionInput.getText().toString().trim();
+                String answer = selectedAnswerType.equals("Short Text")
+                        ? shortTextInput.getText().toString().trim()
+                        : answerInput.getText().toString().trim();
 
                 // Check if the question already exists in the list
                 boolean isDuplicate = false;
@@ -115,39 +212,46 @@ public class FlashcardsActivity extends AppCompatActivity {
                     // For Multiple Choice questions, split options by commas
                     if (selectedAnswerType.equals("Multiple Choice")) {
                         String[] optionArray = answer.split(",");
+                        List<String> cleanedOptions = new ArrayList<>();
+
+                        // Clean the options to remove empty strings and trim spaces
                         for (String option : optionArray) {
-                            options.add(option.trim());
+                            String trimmedOption = option.trim();
+                            if (!trimmedOption.isEmpty()) {
+                                cleanedOptions.add(trimmedOption);
+                            }
                         }
-                        // correctAnswer = "yes";  Hardcoded correct answer for now (could be dynamic based on user input)
-                        correctAnswer = options.get(0);
+
+                        // Check if there are more than 3 options
+                        if (cleanedOptions.size() > 3) {
+                            Toast.makeText(this, "You can only provide up to 3 options for multiple choice.", Toast.LENGTH_SHORT).show();
+                            answerInput.setText(""); // Clear the input field
+                            return;  // Exit the function if there are more than 3 valid options
+                        }
+
+                        // Add valid options to the list
+                        options.addAll(cleanedOptions);
+                        correctAnswer = options.get(0);  // Set the correct answer (first option)
 
                     } else {
-                        options.add(answer);  // For short text questions, the answer is the correct one
+                        options.add(answer);  // For short text questions, the answer itself is the only option
                         correctAnswer = answer;
                     }
 
                     // Create a new Flashcard and add it to the list
                     Flashcard newFlashcard = new Flashcard(question, answer, selectedAnswerType, options);
-                    newFlashcard.setCorrectAnswer(answer);  // Set the correct answer
+                    newFlashcard.setCorrectAnswer(correctAnswer);  // Set the correct answer
                     flashcards.add(newFlashcard);
-
 
                     // Notify the adapter to update the RecyclerView
                     adapter.notifyDataSetChanged();
-
-//                    // Clear the input fields after adding the flashcard
-//                    questionInput.setText("");
-//                    answerInput.setText("");
-//                    shortTextInput.setText("");  // Clear short text input
-//
-//                    Toast.makeText(this, "Flashcard added", Toast.LENGTH_SHORT).show();
 
                     // Firestore reference
                     FirebaseFirestore db = FirebaseFirestore.getInstance();
                     String userId = FirebaseAuth.getInstance().getCurrentUser().getUid(); // Assuming you're using Firebase Auth
                     DocumentReference flashcardsRef = db.collection("users")
                             .document(userId)
-                            .collection("reviewers")
+                            .collection("reviewer")
                             .document(reviewerId)
                             .collection("flashcards")
                             .document();
@@ -163,20 +267,20 @@ public class FlashcardsActivity extends AppCompatActivity {
                                 shortTextInput.setText("");
 
                                 Toast.makeText(this, "Flashcard added successfully", Toast.LENGTH_SHORT).show();
+
                             })
                             .addOnFailureListener(e -> {
                                 Toast.makeText(this, "Failed to save flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                             });
-
                 } else {
                     Toast.makeText(this, "Please enter a question and answer", Toast.LENGTH_SHORT).show();
                 }
-
             } else {
                 // If the number of flashcards exceeds 100, show a warning
                 Toast.makeText(this, "You can only add up to 100 flashcards", Toast.LENGTH_SHORT).show();
             }
         });
+
 
         // Navigate to view flashcards page
         viewFlashcardsButton.setOnClickListener(view -> {
@@ -314,6 +418,45 @@ public class FlashcardsActivity extends AppCompatActivity {
                 });
     }
 
+//    private void addFlashcard(String question, String answer, String answerType, List<String> options) {
+//        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+//        if (currentUser != null) {
+//            String userId = currentUser.getUid(); // Get the current user's ID
+//            String reviewerId = getIntent().getStringExtra("reviewerId"); // Get the reviewer ID from Intent
+//
+//            if (reviewerId == null) {
+//                Toast.makeText(this, "Error: Reviewer ID is missing", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//
+//            FirebaseFirestore db = FirebaseFirestore.getInstance();
+//            CollectionReference flashcardsRef = db.collection("users")
+//                    .document(userId)
+//                    .collection("reviewer")
+//                    .document(reviewerId)
+//                    .collection("flashcards");
+//
+//            // Create a new flashcard object
+//            Flashcard flashcard = new Flashcard(question, answer, answerType, options);
+//
+//            // Save the flashcard to Firestore
+//            flashcardsRef.add(flashcard)
+//                    .addOnSuccessListener(documentReference -> {
+//                        Toast.makeText(this, "Flashcard added successfully!", Toast.LENGTH_SHORT).show();
+//                        loadFlashcards(flashcardsRef);
+//
+//                        questionInput.setText("");
+//                        answerInput.setText("");
+//                        shortTextInput.setText("");
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        Toast.makeText(this, "Error adding flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                    });
+//        } else {
+//            Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
+//        }
+//    }
+
     private void addFlashcard(String question, String answer, String answerType, List<String> options) {
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser != null) {
@@ -332,22 +475,44 @@ public class FlashcardsActivity extends AppCompatActivity {
                     .document(reviewerId)
                     .collection("flashcards");
 
-            // Create a new flashcard object
-            Flashcard flashcard = new Flashcard(question, answer, answerType, options);
+            // Check for duplicate question
+            flashcardsRef.whereEqualTo("question", question)
+                    .get()
+                    .addOnSuccessListener(querySnapshot -> {
+                        if (!querySnapshot.isEmpty()) {
+                            // If the question already exists, show a message
+                            Toast.makeText(this, "This question already exists. Please enter a unique question.", Toast.LENGTH_SHORT).show();
+                        } else {
+                            // Check if the options list has more than 3 choices for Multiple Choice questions
+                            if (answerType.equals("Multiple Choice") && options.size() > 3) {
+                                Toast.makeText(this, "You can only provide up to 3 options for multiple choice.", Toast.LENGTH_SHORT).show();
+                            } else {
+                                // Create a new flashcard object
+                                Flashcard flashcard = new Flashcard(question, answer, answerType, options);
 
-            // Save the flashcard to Firestore
-            flashcardsRef.add(flashcard)
-                    .addOnSuccessListener(documentReference -> {
-                        Toast.makeText(this, "Flashcard added successfully!", Toast.LENGTH_SHORT).show();
-                        loadFlashcards(flashcardsRef);
+                                // Save the flashcard to Firestore
+                                flashcardsRef.add(flashcard)
+                                        .addOnSuccessListener(documentReference -> {
+                                            Toast.makeText(this, "Flashcard added successfully!", Toast.LENGTH_SHORT).show();
+                                            loadFlashcards(flashcardsRef);
+
+                                            // Clear the input fields
+                                            questionInput.setText("");
+                                            answerInput.setText("");
+                                            shortTextInput.setText("");
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(this, "Error adding flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                        });
+                            }
+                        }
                     })
                     .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Error adding flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error checking for duplicate: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         } else {
             Toast.makeText(this, "User not authenticated", Toast.LENGTH_SHORT).show();
         }
     }
-
 
 }
