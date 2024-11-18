@@ -23,6 +23,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.moodchecker.adapter.TodoAdapter;
 import com.example.moodchecker.model.TodoItem;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -38,11 +41,19 @@ public class DashboardActivity extends AppCompatActivity {
     private List<TodoItem> todoList;
     private Button addTaskButton;
     private Button removeTaskButton;
+    private FirebaseFirestore db;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_dashboard);
+
+        // Firestore initialization
+        db = FirebaseFirestore.getInstance();
+
+        // Assume the user is authenticated (use Firebase Auth)
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
         moodMessageTextView = findViewById(R.id.moodMessageTextView);
         flashcardsButton = findViewById(R.id.flashcardsButton);
@@ -118,7 +129,7 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
-            addTaskButton.setOnClickListener(v -> {
+        addTaskButton.setOnClickListener(v -> {
                 // Inflate the custom layout
                 View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_task, null);
 
@@ -126,11 +137,11 @@ public class DashboardActivity extends AppCompatActivity {
                 EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
                 Spinner statusSpinner = dialogView.findViewById(R.id.statusSpinner);
                 TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);  // Updated to TextView for date picker
-                EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
-                EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
-                EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
-                Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
-                Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
+//                EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
+//                EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
+//                EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
+//                Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
+//                Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
 
                 // Set up the spinner with status options
                 ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this,
@@ -176,67 +187,92 @@ public class DashboardActivity extends AppCompatActivity {
                                         .show();
                             } else {
 
-                                // Get timer values (hours, minutes, seconds)
-                                int hours = Integer.parseInt(hoursEditText.getText().toString());
-                                int minutes = Integer.parseInt(minutesEditText.getText().toString());
-                                int seconds = Integer.parseInt(secondsEditText.getText().toString());
-
-                                // Calculate the total duration in milliseconds
-                                long timerDuration = (hours * 3600 + minutes * 60 + seconds) * 1000;
+//                                // Get timer values (hours, minutes, seconds)
+//                                int hours = Integer.parseInt(hoursEditText.getText().toString());
+//                                int minutes = Integer.parseInt(minutesEditText.getText().toString());
+//                                int seconds = Integer.parseInt(secondsEditText.getText().toString());
+//
+//                                // Calculate the total duration in milliseconds
+//                                long timerDuration = (hours * 3600 + minutes * 60 + seconds) * 1000;
 
                                 // Add a new task to the list with the timer duration
-                                TodoItem newTask = new TodoItem(taskName, status, deadline, timerDuration);
-                                todoList.add(newTask);
-                                todoAdapter.notifyItemInserted(todoList.size() - 1);
-                                todoRecyclerView.scrollToPosition(todoList.size() - 1);
+//                                TodoItem newTask = new TodoItem(taskName, status, deadline);
+//                                todoList.add(newTask);
+//                                todoAdapter.notifyItemInserted(todoList.size() - 1);
+//                                todoRecyclerView.scrollToPosition(todoList.size() - 1);
 
-                                // Step 4: Set the alarm for the notification
-                                long currentTime = System.currentTimeMillis();
-                                long triggerTime = currentTime + timerDuration; // Set the alarm to trigger after timerDuration
+                                TodoItem newTask = new TodoItem(taskName, status, deadline);
 
-                                if (triggerTime - currentTime < 30000) {
-                                    triggerTime = currentTime + 30000; // Set trigger time to be 30 seconds from now
-                                }
+                                // Add the task to Firestore
+                                db.collection("users")
+                                        .document(userId) // User's unique document
+                                        .collection("tasks") // Subcollection for tasks
+                                        .add(newTask)
+                                        .addOnSuccessListener(documentReference -> {
+                                            // Add task to the local list and update RecyclerView
+                                            todoList.add(newTask);
+                                            todoAdapter.notifyItemInserted(todoList.size() - 1);
+                                            todoRecyclerView.scrollToPosition(todoList.size() - 1);
 
-                                Log.d("Alarm", "Trigger time: " + triggerTime + ", Current time: " + currentTime);
-                                // Check if the app can schedule exact alarms (Android 12 and above)
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                                    if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
-                                        // Set the alarm to trigger the notification
-                                        Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
-                                        notificationIntent.putExtra("taskName", taskName);
-
-                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                                                DashboardActivity.this,
-                                                0,
-                                                notificationIntent,
-                                                PendingIntent.FLAG_IMMUTABLE);
-
-
-                                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-                                    } else {
-                                        // Redirect user to request permission to schedule exact alarms
-                                        Intent intents = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
-                                        startActivity(intents);
-                                    }
-                                } else {
-                                    // For Android versions below 12, directly schedule the exact alarm
-                                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-                                    if (alarmManager != null) {
-                                        Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
-                                        notificationIntent.putExtra("taskName", taskName);
-
-                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(
-                                                DashboardActivity.this,
-                                                0,
-                                                notificationIntent,
-                                                PendingIntent.FLAG_IMMUTABLE);
+                                            Log.d("Firestore", "Task added successfully: " + documentReference.getId());
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Log.e("Firestore", "Error adding task", e);
+                                            new AlertDialog.Builder(DashboardActivity.this)
+                                                    .setTitle("Error")
+                                                    .setMessage("Failed to save the task. Please try again.")
+                                                    .setPositiveButton("OK", null)
+                                                    .show();
+                                        });
 
 
-                                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
-                                    }
-                                }
+//                                // Step 4: Set the alarm for the notification
+//                                long currentTime = System.currentTimeMillis();
+//                                long triggerTime = currentTime + timerDuration; // Set the alarm to trigger after timerDuration
+//
+//                                if (triggerTime - currentTime < 30000) {
+//                                    triggerTime = currentTime + 30000; // Set trigger time to be 30 seconds from now
+//                                }
+//
+//                                Log.d("Alarm", "Trigger time: " + triggerTime + ", Current time: " + currentTime);
+//                                // Check if the app can schedule exact alarms (Android 12 and above)
+//                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+//                                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+//                                    if (alarmManager != null && alarmManager.canScheduleExactAlarms()) {
+//                                        // Set the alarm to trigger the notification
+//                                        Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
+//                                        notificationIntent.putExtra("taskName", taskName);
+//
+//                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+//                                                DashboardActivity.this,
+//                                                0,
+//                                                notificationIntent,
+//                                                PendingIntent.FLAG_IMMUTABLE);
+//
+//
+//                                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+//                                    } else {
+//                                        // Redirect user to request permission to schedule exact alarms
+//                                        Intent intents = new Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+//                                        startActivity(intents);
+//                                    }
+//                                } else {
+//                                    // For Android versions below 12, directly schedule the exact alarm
+//                                    AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+//                                    if (alarmManager != null) {
+//                                        Intent notificationIntent = new Intent(DashboardActivity.this, NotificationReceiver.class);
+//                                        notificationIntent.putExtra("taskName", taskName);
+//
+//                                        PendingIntent pendingIntent = PendingIntent.getBroadcast(
+//                                                DashboardActivity.this,
+//                                                0,
+//                                                notificationIntent,
+//                                                PendingIntent.FLAG_IMMUTABLE);
+//
+//
+//                                        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerTime, pendingIntent);
+//                                    }
+//                                }
                             }
                         })
                         .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
@@ -268,50 +304,48 @@ public class DashboardActivity extends AppCompatActivity {
                 });
 
             // Timer logic: Start the timer when the button is clicked
-            startTimerButton.setOnClickListener(v1 -> {
-                startTimerButton.setEnabled(false);  // Disable start button once started
-                stopTimerButton.setEnabled(true);   // Enable stop button
+//                startTimerButton.setOnClickListener(v1 -> {
+//                startTimerButton.setEnabled(false);  // Disable start button once started
+//                stopTimerButton.setEnabled(true);   // Enable stop button
+//
+//                // You can implement the timer logic here using a Handler or TimerTask
+//                // Example of updating the timer every second:
+//                final Handler handler = new Handler();
+//                final int[] secondsRemaining = {0};  // To keep track of the elapsed time
+//                Runnable timerRunnable = new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        // Update the timer fields every second
+//                        secondsRemaining[0]++;
+//
+//                        int hours = secondsRemaining[0] / 3600;
+//                        int minutes = (secondsRemaining[0] % 3600) / 60;
+//                        int seconds = secondsRemaining[0] % 60;
+//
+//                        // Update the EditText fields with the current time
+//                        hoursEditText.setText(String.format("%02d", hours));
+//                        minutesEditText.setText(String.format("%02d", minutes));
+//                        secondsEditText.setText(String.format("%02d", seconds));
+//
+//                        // Continue running the timer every second
+//                        handler.postDelayed(this, 1000);
+//                    }
+//                };
+//
+//                // Start the timer
+//                handler.post(timerRunnable);
+//            });
 
-                // You can implement the timer logic here using a Handler or TimerTask
-                // Example of updating the timer every second:
-                final Handler handler = new Handler();
-                final int[] secondsRemaining = {0};  // To keep track of the elapsed time
-                Runnable timerRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        // Update the timer fields every second
-                        secondsRemaining[0]++;
-
-                        int hours = secondsRemaining[0] / 3600;
-                        int minutes = (secondsRemaining[0] % 3600) / 60;
-                        int seconds = secondsRemaining[0] % 60;
-
-                        // Update the EditText fields with the current time
-                        hoursEditText.setText(String.format("%02d", hours));
-                        minutesEditText.setText(String.format("%02d", minutes));
-                        secondsEditText.setText(String.format("%02d", seconds));
-
-                        // Continue running the timer every second
-                        handler.postDelayed(this, 1000);
-                    }
-                };
-
-                // Start the timer
-                handler.post(timerRunnable);
-            });
-
-            // Stop the timer logic
-            stopTimerButton.setOnClickListener(v12 -> {
-                startTimerButton.setEnabled(true);  // Re-enable the start button
-                stopTimerButton.setEnabled(false); // Disable stop button
-
-                // Stop the timer and update the task with the final time
-                // Store the time in timerDuration (convert back to milliseconds)
-                // You may need a way to store the elapsed time in a variable for future tasks
-            });
+//            // Stop the timer logic
+//            stopTimerButton.setOnClickListener(v12 -> {
+//                startTimerButton.setEnabled(true);  // Re-enable the start button
+//                stopTimerButton.setEnabled(false); // Disable stop button
+//
+//                // Stop the timer and update the task with the final time
+//                // Store the time in timerDuration (convert back to milliseconds)
+//                // You may need a way to store the elapsed time in a variable for future tasks
+//            });
         });
-
-
 
         removeTaskButton.setOnClickListener(v -> {
             if (!todoList.isEmpty()) {
@@ -320,6 +354,20 @@ public class DashboardActivity extends AppCompatActivity {
                 todoAdapter.notifyItemRemoved(lastPosition);
             }
         });
+
+        db.collection("users")
+                .document(userId)
+                .collection("tasks")
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (DocumentSnapshot document : queryDocumentSnapshots) {
+                        TodoItem task = document.toObject(TodoItem.class);
+                        todoList.add(task);
+                    }
+                    todoAdapter.notifyDataSetChanged();
+                })
+                .addOnFailureListener(e -> Log.e("Firestore", "Error fetching tasks", e));
+
     }
 
 }

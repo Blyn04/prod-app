@@ -28,21 +28,18 @@
         android:drawableRight="@android:drawable/ic_menu_my_calendar"
         android:layout_marginTop="10dp" />
 
-    <!-- Timer Section -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Set Timer"
         android:textStyle="bold"
-        android:layout_marginTop="20dp"
-        android:visibility="gone"/>
+        android:layout_marginTop="20dp" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center"
-        android:visibility="gone">
+        android:gravity="center">
 
         <EditText
             android:id="@+id/hoursEditText"
@@ -89,8 +86,7 @@
         android:text="Start"
         android:layout_marginTop="10dp"
         android:backgroundTint="@color/yellow"
-        android:textColor="@android:color/white"
-        android:visibility="gone"/>
+        android:textColor="@android:color/white" />
 
     <Button
         android:id="@+id/stopTimerButton"
@@ -99,7 +95,5 @@
         android:text="Stop"
         android:layout_marginTop="10dp"
         android:backgroundTint="@color/green"
-        android:textColor="@android:color/white"
-        android:visibility="gone"/>
-
+        android:textColor="@android:color/white" />
 </LinearLayout>

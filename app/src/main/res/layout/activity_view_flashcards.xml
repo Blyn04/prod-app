@@ -81,7 +81,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your answer"
-                android:visibility="gone" /> <!-- Hidden by default -->
+                android:visibility="gone" />
 
             <!-- Back, Next and Submit buttons -->
             <LinearLayout

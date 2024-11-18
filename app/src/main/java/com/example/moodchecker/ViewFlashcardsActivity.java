@@ -52,7 +52,6 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
             flashcards = new ArrayList<>();
         }
 
-        // Link UI components
         questionNumberTextView = findViewById(R.id.questionNumber);
         questionTextView = findViewById(R.id.questionText);
         optionOne = findViewById(R.id.optionOne);
@@ -60,7 +59,7 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         optionThree = findViewById(R.id.optionThree);
         optionFour = findViewById(R.id.optionFour);
         optionsGroup = findViewById(R.id.optionsGroup);
-        streakTextView = findViewById(R.id.streakTextView); // Initialize the streak TextView
+        streakTextView = findViewById(R.id.streakTextView);
 
         Button backButton = findViewById(R.id.backButton);
         Button nextButton = findViewById(R.id.nextButton);
