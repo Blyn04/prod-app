@@ -13,12 +13,16 @@
     import androidx.recyclerview.widget.RecyclerView;
     import com.example.moodchecker.R;
     import com.example.moodchecker.model.Flashcard;
+    import com.google.firebase.firestore.FirebaseFirestore;
 
     import java.util.List;
 
     public class FlashcardAdapter extends RecyclerView.Adapter<FlashcardAdapter.FlashcardViewHolder> {
 
         private List<Flashcard> flashcards;
+        private FirebaseFirestore firestore;
+        private String userId;
+        private String reviewerId;
 
         public FlashcardAdapter(List<Flashcard> flashcards) {
             this.flashcards = flashcards;

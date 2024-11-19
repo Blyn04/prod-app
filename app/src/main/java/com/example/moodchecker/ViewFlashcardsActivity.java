@@ -1,5 +1,6 @@
 package com.example.moodchecker;
 
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,6 +10,8 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -21,10 +24,10 @@ import com.google.firebase.firestore.SetOptions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
-public class ViewFlashcardsActivity extends AppCompatActivity {
-
+public class ViewFlashcardsActivity extends AppCompatActivity implements TextToSpeech.OnInitListener {
     private List<Flashcard> flashcards;
     private int currentIndex = 0;
     private RadioGroup optionsGroup;
@@ -33,6 +36,8 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
     private RadioButton optionOne, optionTwo, optionThree, optionFour;
     private TextView streakTextView;
     private int streakCount = 0;
+    private TextToSpeech textToSpeech;
+    private Button ttsButton;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -45,6 +50,8 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         String userId = mAuth.getCurrentUser().getUid(); // Make sure to authenticate users
 
         loadStreakFromFirebase();
+
+        textToSpeech = new TextToSpeech(this, this);
 
         // Initialize flashcards list from intent
         flashcards = (List<Flashcard>) getIntent().getSerializableExtra("flashcardsList");
@@ -60,6 +67,7 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         optionFour = findViewById(R.id.optionFour);
         optionsGroup = findViewById(R.id.optionsGroup);
         streakTextView = findViewById(R.id.streakTextView);
+        ttsButton = findViewById(R.id.ttsButton);
 
         Button backButton = findViewById(R.id.backButton);
         Button nextButton = findViewById(R.id.nextButton);
@@ -68,7 +76,6 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         // Display the first question
         displayFlashcard(currentIndex);
 
-        // Handle Next button
         nextButton.setOnClickListener(view -> {
             if (currentIndex < flashcards.size() - 1) {
                 currentIndex++;
@@ -79,12 +86,18 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
             }
         });
 
-        // Handle Back button
         backButton.setOnClickListener(view -> {
             if (currentIndex > 0) {
                 currentIndex--;
                 displayFlashcard(currentIndex);
             }
+        });
+
+        ttsButton.setOnClickListener(view -> {
+            // Trigger TTS to read the current question
+            Flashcard flashcard = flashcards.get(currentIndex);
+            String questionText = flashcard.getQuestion();
+            textToSpeech.speak(questionText, TextToSpeech.QUEUE_FLUSH, null, null);
         });
 
         submitButton.setOnClickListener(view -> {
@@ -165,6 +178,20 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    public void onInit(int status) {
+        if (status == TextToSpeech.SUCCESS) {
+            int langResult = textToSpeech.setLanguage(Locale.US);
+            if (langResult == TextToSpeech.LANG_MISSING_DATA | langResult == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "Language is not supported or missing data.");
+            } else {
+                Log.i("TTS", "Language set successfully.");
+            }
+        } else {
+            Log.e("TTS", "Initialization failed.");
+        }
+    }
+
     private void goToNextQuestion() {
         if (currentIndex < flashcards.size() - 1) {
             currentIndex++;
@@ -178,12 +205,70 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
         }
     }
 
+//    private void displayFlashcard(int index) {
+//        if (index < flashcards.size()) {
+//            Flashcard flashcard = flashcards.get(index);
+//            questionNumberTextView.setText("QUESTION " + String.format("%02d", index + 1));
+//            questionTextView.setText(flashcard.getQuestion());
+//
+//            List<String> options = flashcard.getOptions();
+//
+//            if (flashcard.getAnswerType().equals("Multiple Choice")) {
+//                optionsGroup.setVisibility(View.VISIBLE);
+//
+//                if (options != null && options.size() > 0) {
+//                    optionOne.setText(options.get(0));
+//                    optionOne.setVisibility(View.VISIBLE);
+//                } else {
+//                    optionOne.setVisibility(View.GONE);
+//                }
+//
+//                if (options.size() > 1) {
+//                    optionTwo.setText(options.get(1));
+//                    optionTwo.setVisibility(View.VISIBLE);
+//                } else {
+//                    optionTwo.setVisibility(View.GONE);
+//                }
+//
+//                if (options.size() > 2) {
+//                    optionThree.setText(options.get(2));
+//                    optionThree.setVisibility(View.VISIBLE);
+//                } else {
+//                    optionThree.setVisibility(View.GONE);
+//                }
+//
+//                if (options.size() > 3) {
+//                    optionFour.setText(options.get(3));
+//                    optionFour.setVisibility(View.VISIBLE);
+//                } else {
+//                    optionFour.setVisibility(View.GONE);
+//                }
+//
+//                findViewById(R.id.shortTextInput).setVisibility(View.GONE);
+//
+//            } else if (flashcard.getAnswerType().equals("Short Text")) {
+//                optionsGroup.setVisibility(View.GONE);
+//
+//                findViewById(R.id.shortTextInput).setVisibility(View.VISIBLE);
+//                EditText shortTextInput = findViewById(R.id.shortTextInput);
+//                shortTextInput.setText("");
+//            }
+//        }
+//    }
 
     private void displayFlashcard(int index) {
         if (index < flashcards.size()) {
             Flashcard flashcard = flashcards.get(index);
             questionNumberTextView.setText("QUESTION " + String.format("%02d", index + 1));
             questionTextView.setText(flashcard.getQuestion());
+
+            // Use TTS to read the question
+//            textToSpeech.speak(flashcard.getQuestion(), TextToSpeech.QUEUE_FLUSH, null, null);
+            // Use TTS to read the question with audio stream parameter
+            HashMap<String, String> params = new HashMap<>();
+            params.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_MUSIC));
+            textToSpeech.speak(flashcard.getQuestion(), TextToSpeech.QUEUE_FLUSH, params);
+
 
             List<String> options = flashcard.getOptions();
 
@@ -229,6 +314,7 @@ public class ViewFlashcardsActivity extends AppCompatActivity {
             }
         }
     }
+
 
     private String getSelectedOption() {
         int selectedId = optionsGroup.getCheckedRadioButtonId();

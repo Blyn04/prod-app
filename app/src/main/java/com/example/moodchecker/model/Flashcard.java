@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 public class Flashcard implements Serializable {
+    private String id;
     private String question;
     private String answer;
     private String answerType;
@@ -19,6 +20,14 @@ public class Flashcard implements Serializable {
         this.answer = answer;
         this.answerType = answerType;
         this.options = options;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getQuestion() {

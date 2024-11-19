@@ -28,29 +28,36 @@
         android:layout_height="wrap_content"
         android:visibility="gone">
 
-        <RadioButton
-            android:id="@+id/optionOne"
-            android:text="Option 1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+        <RadioGroup
+            android:id="@+id/radioGroupOptions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-        <RadioButton
-            android:id="@+id/optionTwo"
-            android:text="Option 2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <RadioButton
+                android:id="@+id/optionOne"
+                android:text="Option 1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
-        <RadioButton
-            android:id="@+id/optionThree"
-            android:text="Option 3"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <RadioButton
+                android:id="@+id/optionTwo"
+                android:text="Option 2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
 
-        <RadioButton
-            android:id="@+id/optionFour"
-            android:text="Option 4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            <RadioButton
+                android:id="@+id/optionThree"
+                android:text="Option 3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/optionFour"
+                android:text="Option 4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </RadioGroup>
 
     </LinearLayout>
 
