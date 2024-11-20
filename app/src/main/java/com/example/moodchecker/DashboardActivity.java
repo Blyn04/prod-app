@@ -54,6 +54,7 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Firestore initialization
         db = FirebaseFirestore.getInstance();
+        FirebaseAuth auth = FirebaseAuth.getInstance();
 
         // Assume the user is authenticated (use Firebase Auth)
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -64,6 +65,7 @@ public class DashboardActivity extends AppCompatActivity {
         playSoundButton = findViewById(R.id.playSoundButton);
         addTaskButton = findViewById(R.id.addTaskButton);
         removeTaskButton = findViewById(R.id.removeTaskButton);
+        TextView dashboardTitle = findViewById(R.id.dashboardTitle);
 
         // Define lists of messages for each mood
         List<String> tiredMessages = Arrays.asList(
@@ -117,6 +119,25 @@ public class DashboardActivity extends AppCompatActivity {
                 "Tranquility is the foundation of success. Keep riding this wave of calm.",
                 "Your peaceful energy is inspiring! Carry it with you and make the most of it."
         );
+
+        db.collection("users") // Assuming "users" is the collection in Firestore
+                .document(userId) // The document ID is the user ID
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String username = documentSnapshot.getString("username"); // Assuming "username" is a field
+                        if (username != null) {
+                            dashboardTitle.setText("Welcome, " + username + "!");
+                        } else {
+                            dashboardTitle.setText("Welcome!");
+                        }
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle error if the username is not found
+                    Log.e("Firestore", "Error fetching username", e);
+                    dashboardTitle.setText("Welcome!");
+                });
 
         Intent intent = getIntent();
         String selectedMood = intent.getStringExtra("selectedMood");

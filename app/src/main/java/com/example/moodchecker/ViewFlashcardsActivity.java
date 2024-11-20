@@ -16,6 +16,8 @@ import android.speech.tts.TextToSpeech.OnInitListener;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatImageView;
+
 import com.example.moodchecker.model.Flashcard;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
@@ -339,46 +341,114 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         return null;
     }
 
+//    private void updateStreakDisplay() {
+//        streakTextView.setText("Streak: " + streakCount);
+//
+//        // Show specific message based on the streak count
+//        String message = "";
+//
+//        switch (streakCount) {
+//            case 10:
+//                message = "You're doing great! Keep up the momentum!";
+//                break;
+//            case 20:
+//                message = "Fantastic progress! Your hard work is paying off!";
+//                break;
+//            case 30:
+//                message = "Impressive! You’re mastering this material!";
+//                break;
+//            case 40:
+//                message = "Amazing focus! You’re well on your way to acing this.";
+//                break;
+//            case 50:
+//                message = "Halfway to 100! Keep that knowledge growing!";
+//                break;
+//            case 60:
+//                message = "Incredible dedication! You're truly committed.";
+//                break;
+//            case 70:
+//                message = "You're unstoppable! Just a few more to hit 100!";
+//                break;
+//            case 80:
+//                message = "Your effort is inspiring! Keep pushing forward.";
+//                break;
+//            case 90:
+//                message = "Almost at 100! You're a reviewing champion!";
+//                break;
+//            case 100:
+//                message = "Congratulations on 100! Your dedication is remarkable!";
+//                break;
+//            default:
+//                message = "";
+//                break;
+//        }
+//
+//        // If a message is available for the streak, show it
+//        if (!message.isEmpty()) {
+//            showStreakPopup(streakCount, message);
+//        }
+//    }
+//
+//    private void showStreakPopup(int streak, String message) {
+//        // Inflate the custom layout
+//        View dialogView = getLayoutInflater().inflate(R.layout.dialog_streak, null);
+//
+//        // Create the dialog
+//        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+//        builder.setView(dialogView);
+//
+//        // Customize dialog elements
+//        TextView streakMessage = dialogView.findViewById(R.id.streakMessage);
+//        TextView streakCountMessage = dialogView.findViewById(R.id.streakCountMessage);
+//        Button okButton = dialogView.findViewById(R.id.okButton);
+//
+//        // Update the dialog message based on streak count
+//        streakCountMessage.setText( streak + " Streak!!");
+//        streakMessage.setText(message);
+//
+//        // Show the dialog
+//        androidx.appcompat.app.AlertDialog dialog = builder.create();
+//        dialog.show();
+//
+//        // Handle the OK button click
+//        okButton.setOnClickListener(v -> dialog.dismiss());
+//    }
+
     private void updateStreakDisplay() {
         streakTextView.setText("Streak: " + streakCount);
 
         // Show specific message based on the streak count
         String message = "";
+        AppCompatImageView streakIcon = findViewById(R.id.streakIcon);
 
-        switch (streakCount) {
-            case 10:
-                message = "You're doing great! Keep up the momentum!";
-                break;
-            case 20:
-                message = "Fantastic progress! Your hard work is paying off!";
-                break;
-            case 30:
-                message = "Impressive! You’re mastering this material!";
-                break;
-            case 40:
-                message = "Amazing focus! You’re well on your way to acing this.";
-                break;
-            case 50:
-                message = "Halfway to 100! Keep that knowledge growing!";
-                break;
-            case 60:
-                message = "Incredible dedication! You're truly committed.";
-                break;
-            case 70:
-                message = "You're unstoppable! Just a few more to hit 100!";
-                break;
-            case 80:
-                message = "Your effort is inspiring! Keep pushing forward.";
-                break;
-            case 90:
-                message = "Almost at 100! You're a reviewing champion!";
-                break;
-            case 100:
-                message = "Congratulations on 100! Your dedication is remarkable!";
-                break;
-            default:
-                message = "";
-                break;
+        // Default icon for all streaks except 30, 50, 70, and 100
+        streakIcon.setImageResource(R.drawable.streakfire);  // Set default icon
+
+        // Check the streak count and update accordingly
+        if (streakCount == 10) {
+            message = "You're doing great! Keep up the momentum!";
+        } else if (streakCount == 20) {
+            message = "Fantastic progress! Your hard work is paying off!";
+        } else if (streakCount == 30) {
+            message = "Impressive! You’re mastering this material!";
+            streakIcon.setImageResource(R.drawable.s30);   // Set to s30 for 30 streak
+        } else if (streakCount == 40) {
+            message = "Amazing focus! You’re well on your way to acing this.";
+        } else if (streakCount == 50) {
+            message = "Halfway to 100! Keep that knowledge growing!";
+            streakIcon.setImageResource(R.drawable.s50);   // Set to s50 for 50 streak
+        } else if (streakCount == 60) {
+            message = "Incredible dedication! You're truly committed.";
+        } else if (streakCount == 70) {
+            message = "You're unstoppable! Just a few more to hit 100!";
+            streakIcon.setImageResource(R.drawable.s70);   // Set to s70 for 70 streak
+        } else if (streakCount == 80) {
+            message = "Your effort is inspiring! Keep pushing forward.";
+        } else if (streakCount == 90) {
+            message = "Almost at 100! You're a reviewing champion!";
+        } else if (streakCount == 100) {
+            message = "Congratulations on 100! Your dedication is remarkable!";
+            streakIcon.setImageResource(R.drawable.s100);   // Set to s100 for 100 streak
         }
 
         // If a message is available for the streak, show it
@@ -401,7 +471,7 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         Button okButton = dialogView.findViewById(R.id.okButton);
 
         // Update the dialog message based on streak count
-        streakCountMessage.setText( streak + " Streak!!");
+        streakCountMessage.setText(streak + " Streak!!");
         streakMessage.setText(message);
 
         // Show the dialog
@@ -411,6 +481,7 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         // Handle the OK button click
         okButton.setOnClickListener(v -> dialog.dismiss());
     }
+
 
     private void saveStreakToFirebase(int streakCount) {
         // Get the current user's UID

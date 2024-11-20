@@ -35,6 +35,8 @@ public class ProfileActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
     private ImageView profileAvatar;
+    private ImageView badgeImageView;
+    private int streak;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,11 +122,152 @@ public class ProfileActivity extends AppCompatActivity {
         });
         toggleEditing(false);
 
+        badgeImageView = findViewById(R.id.badge);
+        streak = getUserStreak(); // Assuming you have a method to fetch the user's streak
+
+        updateBadge(streak);
+
         // Load the current user's profile data from Firestore
         loadUserProfile();
+
     }
 
     // Fetch the current user's data from Firestore
+//    private void loadUserProfile() {
+//        // Get the current user from FirebaseAuth
+//        String userId = mAuth.getCurrentUser().getUid();  // Current logged-in user's UID
+//
+//        db.collection("users")
+//                .document(userId)
+//                .collection("streaks") // Access the streaks sub-collection
+//                .get()
+//                .addOnSuccessListener(queryDocumentSnapshots -> {
+//                    if (!queryDocumentSnapshots.isEmpty()) {
+//                        // Loop through the documents in the streaks collection
+//                        for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+//                            // Retrieve the 'streak' field from each document
+//                            Object streakField = documentSnapshot.get("streak");
+//
+//                            if (streakField != null) {
+//                                // Check if the streak is a number (long or int)
+//                                if (streakField instanceof Long) {
+//                                    // If the streak is a Long (number), display it as String
+//                                    tvStreak.setText(String.valueOf(streakField));
+//                                } else if (streakField instanceof Integer) {
+//                                    // If the streak is an Integer, display it as String
+//                                    tvStreak.setText(String.valueOf(streakField));
+//                                } else if (streakField instanceof Double) {
+//                                    // If the streak is a Double, display it as String
+//                                    tvStreak.setText(String.valueOf(streakField));
+//                                } else {
+//                                    // If the streak is of an unsupported type, handle it
+//                                    tvStreak.setText("0");
+//                                }
+//                                break;  // Assuming you only need the first streak document
+//                            }
+//                        }
+//                    } else {
+//                        // If no streak document exists, set default value (e.g., "0")
+//                        tvStreak.setText("0");
+//                        Toast.makeText(ProfileActivity.this, "Streak data not found!", Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    Toast.makeText(ProfileActivity.this, "Error loading streak data", Toast.LENGTH_SHORT).show();
+//                });
+//
+//        db.collection("users")
+//                .document(userId)
+//                .get()
+//                .addOnSuccessListener(documentSnapshot -> {
+//                    if (documentSnapshot.exists()) {
+//                        // Get user details from the document
+//                        String name = documentSnapshot.getString("username");
+//                        String email = documentSnapshot.getString("email");
+//                        String cardColor = documentSnapshot.getString("cardColor");
+//
+//                        User user = new User(name, email);
+//
+//                        // Set the fetched details in the UI
+//                        if (name != null) etName.setText(name);
+//                        if (email != null) etGmail.setText(email);
+//                        if (cardColor != null) {
+//                            GradientDrawable background = (GradientDrawable) idCardSection.getBackground();
+//                            background.setColor(android.graphics.Color.parseColor(cardColor));
+//                        }
+//
+//                        toggleEditing(false);
+//                    } else {
+//                        Toast.makeText(ProfileActivity.this, "User data not found!", Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    Toast.makeText(ProfileActivity.this, "Error loading profile data", Toast.LENGTH_SHORT).show();
+//                });
+//
+////        db.collection("users").document(userId)
+////                .get()
+////                .addOnSuccessListener(documentSnapshot -> {
+////                    if (documentSnapshot.exists()) {
+////                        String avatar = documentSnapshot.getString("avatar");
+////                        if (avatar != null) {
+////                            switch (avatar) {
+////                                case "avatar1":
+////                                    updateAvatar(1);
+////                                    break;
+////                                case "avatar2":
+////                                    updateAvatar(2);
+////                                    break;
+////                                case "avatar3":
+////                                    updateAvatar(3);
+////                                    break;
+////                                case "avatar4":
+////                                    updateAvatar(4);
+////                                    break;
+////                                case "avatar5":
+////                                    updateAvatar(5);
+////                                    break;
+////                                case "avatar6":
+////                                    updateAvatar(6);
+////                                    break;
+////                                case "avatar7":
+////                                    updateAvatar(7);
+////                                    break;
+////                                case "avatar8":
+////                                    updateAvatar(8);
+////                                    break;
+////                                case "avatar9":
+////                                    updateAvatar(9);
+////                                    break;
+////                                case "avatar10":
+////                                    updateAvatar(10);
+////                                    break;
+////                            }
+////                        }
+////                    }
+////                })
+////                .addOnFailureListener(e -> Log.e("ProfileActivity", "Failed to load user profile", e));
+//
+//        db.collection("users").document(userId)
+//                .get()
+//                .addOnSuccessListener(documentSnapshot -> {
+//                    if (documentSnapshot.exists()) {
+//                        String avatarName = documentSnapshot.getString("avatar");
+//                        if (avatarName != null && !avatarName.isEmpty()) {
+//                            loadAvatarFromDrawable(avatarName);
+//                        } else {
+//                            // Use default avatar if the avatar field is null or empty
+//                            profileAvatar.setImageResource(R.drawable.avatar1);
+//                        }
+//                    }
+//                })
+//                .addOnFailureListener(e -> {
+//                    Log.e("ProfileActivity", "Failed to load profile data", e);
+//                    // Use default avatar in case of failure
+//                    profileAvatar.setImageResource(R.drawable.avatar1);
+//                });
+//    }
+
     private void loadUserProfile() {
         // Get the current user from FirebaseAuth
         String userId = mAuth.getCurrentUser().getUid();  // Current logged-in user's UID
@@ -135,6 +278,7 @@ public class ProfileActivity extends AppCompatActivity {
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     if (!queryDocumentSnapshots.isEmpty()) {
+                        int totalStreaks = 0;  // Initialize total streaks to 0
                         // Loop through the documents in the streaks collection
                         for (DocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
                             // Retrieve the 'streak' field from each document
@@ -143,21 +287,19 @@ public class ProfileActivity extends AppCompatActivity {
                             if (streakField != null) {
                                 // Check if the streak is a number (long or int)
                                 if (streakField instanceof Long) {
-                                    // If the streak is a Long (number), display it as String
-                                    tvStreak.setText(String.valueOf(streakField));
+                                    // If the streak is a Long (number), add it to the total streaks
+                                    totalStreaks += ((Long) streakField).intValue();
                                 } else if (streakField instanceof Integer) {
-                                    // If the streak is an Integer, display it as String
-                                    tvStreak.setText(String.valueOf(streakField));
+                                    // If the streak is an Integer, add it to the total streaks
+                                    totalStreaks += (Integer) streakField;
                                 } else if (streakField instanceof Double) {
-                                    // If the streak is a Double, display it as String
-                                    tvStreak.setText(String.valueOf(streakField));
-                                } else {
-                                    // If the streak is of an unsupported type, handle it
-                                    tvStreak.setText("0");
+                                    // If the streak is a Double, add it to the total streaks
+                                    totalStreaks += ((Double) streakField).intValue();
                                 }
-                                break;  // Assuming you only need the first streak document
                             }
                         }
+                        // Set the total streaks in the TextView
+                        tvStreak.setText(String.valueOf(totalStreaks));
                     } else {
                         // If no streak document exists, set default value (e.g., "0")
                         tvStreak.setText("0");
@@ -197,48 +339,6 @@ public class ProfileActivity extends AppCompatActivity {
                     Toast.makeText(ProfileActivity.this, "Error loading profile data", Toast.LENGTH_SHORT).show();
                 });
 
-//        db.collection("users").document(userId)
-//                .get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    if (documentSnapshot.exists()) {
-//                        String avatar = documentSnapshot.getString("avatar");
-//                        if (avatar != null) {
-//                            switch (avatar) {
-//                                case "avatar1":
-//                                    updateAvatar(1);
-//                                    break;
-//                                case "avatar2":
-//                                    updateAvatar(2);
-//                                    break;
-//                                case "avatar3":
-//                                    updateAvatar(3);
-//                                    break;
-//                                case "avatar4":
-//                                    updateAvatar(4);
-//                                    break;
-//                                case "avatar5":
-//                                    updateAvatar(5);
-//                                    break;
-//                                case "avatar6":
-//                                    updateAvatar(6);
-//                                    break;
-//                                case "avatar7":
-//                                    updateAvatar(7);
-//                                    break;
-//                                case "avatar8":
-//                                    updateAvatar(8);
-//                                    break;
-//                                case "avatar9":
-//                                    updateAvatar(9);
-//                                    break;
-//                                case "avatar10":
-//                                    updateAvatar(10);
-//                                    break;
-//                            }
-//                        }
-//                    }
-//                })
-//                .addOnFailureListener(e -> Log.e("ProfileActivity", "Failed to load user profile", e));
         db.collection("users").document(userId)
                 .get()
                 .addOnSuccessListener(documentSnapshot -> {
@@ -257,6 +357,25 @@ public class ProfileActivity extends AppCompatActivity {
                     // Use default avatar in case of failure
                     profileAvatar.setImageResource(R.drawable.avatar1);
                 });
+    }
+
+    private void updateBadge(int streak) {
+        if (streak >= 100) {
+            badgeImageView.setImageResource(R.drawable.s100);
+        } else if (streak >= 70) {
+            badgeImageView.setImageResource(R.drawable.s70);
+        } else if (streak >= 50) {
+            badgeImageView.setImageResource(R.drawable.s50);
+        } else if (streak >= 30) {
+            badgeImageView.setImageResource(R.drawable.s30);
+        } else {
+            badgeImageView.setImageResource(R.drawable._0_streak); // Default badge if streak is less than 30
+        }
+    }
+
+    private int getUserStreak() {
+        // For example, get the streak from a user object or a database
+        return 50; // Replace with actual logic to get the streak
     }
 
     private void updateColor(String color) {

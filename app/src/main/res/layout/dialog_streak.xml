@@ -87,7 +87,7 @@
                 app:layout_constraintStart_toStartOf="@+id/streakMessage"
                 app:layout_constraintTop_toBottomOf="@+id/streakMessage" />
 
-            <ImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/streakIcon"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
