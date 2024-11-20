@@ -1,78 +1,95 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:background="#EDEDED">
+    android:background="#FFFFFF"
+    tools:context=".ViewFlashcardsActivity">
 
     <androidx.cardview.widget.CardView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="8dp"
-        android:padding="10dp"
-        android:layout_margin="10dp">
+        android:id="@+id/cardView2"
+        android:layout_width="231dp"
+        android:layout_height="307dp"
+        android:background="#F9F9F9"
+        android:backgroundTint="#F9F9F9"
+        app:cardCornerRadius="15dp"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView22"
+        app:layout_constraintEnd_toEndOf="@+id/imageView22"
+        app:layout_constraintStart_toStartOf="@+id/imageView22"
+        app:layout_constraintTop_toTopOf="@+id/imageView22">
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <!-- Progress indicator -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="2dp"
-                android:background="#000000"
-                android:layout_marginBottom="8dp" />
+            android:layout_height="match_parent"
+            tools:context=".CreateFlashcard">
 
             <TextView
                 android:id="@+id/questionNumber"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="QUESTION 01"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Question #1"
+                android:textColor="#333333"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.472"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/questionText"
-                android:layout_width="wrap_content"
+                android:layout_width="194dp"
                 android:layout_height="wrap_content"
-                android:text="How would you like to make change happen?"
-                android:textSize="18sp"
-                android:layout_marginBottom="16dp" />
+                android:fontFamily="@font/poppins_medium"
+                android:text="may natutunan k b sa subject na i2?"
+                android:textAlignment="center"
+                android:textColor="#333333"
+                android:textSize="12dp"
+                app:layout_constraintEnd_toEndOf="@+id/questionNumber"
+                app:layout_constraintHorizontal_bias="0.485"
+                app:layout_constraintStart_toStartOf="@+id/questionNumber"
+                app:layout_constraintTop_toBottomOf="@+id/questionNumber" />
 
             <!-- Radio buttons for options -->
             <RadioGroup
                 android:id="@+id/optionsGroup"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="16dp">
+                app:layout_constraintBottom_toTopOf="@+id/submitButton"
+                app:layout_constraintTop_toBottomOf="@+id/questionText">
 
                 <RadioButton
                     android:id="@+id/optionOne"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="D.I.Y." />
+                    android:text="D.I.Y."
+                    android:fontFamily="@font/poppins_medium"
+                    android:textSize="12sp"/>
 
                 <RadioButton
                     android:id="@+id/optionTwo"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Contractor" />
+                    android:text="Contractor"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textSize="12sp"/>
 
                 <RadioButton
                     android:id="@+id/optionThree"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Property Manager" />
+                    android:text="Property Manager"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textSize="12sp"/>
 
                 <RadioButton
                     android:id="@+id/optionFour"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Property Manager" />
+                    android:text="Property Manager"
+                    android:fontFamily="@font/poppins_medium"
+                    android:textSize="12sp"/>
             </RadioGroup>
 
             <!-- Input for Short Text Answer -->
@@ -81,65 +98,133 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Enter your answer"
-                android:visibility="gone" />
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@+id/submitButton"
+                app:layout_constraintTop_toBottomOf="@+id/questionText"/>
 
-            <!-- Back, Next and Submit buttons -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <Button
+                android:id="@+id/backButton"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center">
+                android:layout_marginEnd="231dp"
+                android:backgroundTint="#D3D3D3"
+                android:text="Back"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/backButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Back"
-                    android:layout_marginEnd="16dp"
-                    android:backgroundTint="#D3D3D3"
-                    android:visibility="gone"/>
+            <Button
+                android:id="@+id/nextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="231dp"
+                android:backgroundTint="#A1E58B"
+                android:text="Next"
+                android:visibility="gone"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <Button
-                    android:id="@+id/nextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Next"
-                    android:backgroundTint="#A1E58B"
-                    android:visibility="gone"/>
+            <Button
+                android:id="@+id/submitButton"
+                android:layout_width="wrap_content"
+                android:layout_height="45dp"
+                android:layout_marginBottom="12dp"
+                android:backgroundTint="#EDB856"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Submit"
+                android:textColor="#FFFFFF"
+                android:textSize="12dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.496"
+                app:layout_constraintStart_toStartOf="parent" />
 
-                <!-- Submit Button -->
-                <Button
-                    android:id="@+id/submitButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Submit"
-                    android:backgroundTint="#A1E58B"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginLeft="16dp"/>
-
-            </LinearLayout>
+            <ImageButton
+                android:id="@+id/ttsButton"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="16dp"
+                android:backgroundTint="#00FFFFFF"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/volume_high" />
 
             <TextView
                 android:id="@+id/streakTextView"
-                android:text="Streak: 0"
-                android:textSize="18sp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_alignParentStart="true"
                 android:layout_alignParentTop="true"
-                android:layout_alignParentStart="true"/>
-
-            <Button
-                android:id="@+id/ttsButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Read Question"
-                android:backgroundTint="#A1E58B"
-                android:layout_marginTop="16dp"
-                android:layout_gravity="center"/>
-
-
-
-        </LinearLayout>
+                android:text="Streak: 0"
+                android:textSize="10sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
-</LinearLayout>
+
+    <TextView
+        android:id="@+id/textView13"
+        android:layout_width="270dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:fontFamily="@font/lilita_one"
+        android:text="Reviewer Name"
+        android:textAlignment="center"
+        android:textColor="#333333"
+        android:textSize="29dp"
+        app:layout_constraintEnd_toEndOf="@+id/imageView8"
+        app:layout_constraintHorizontal_bias="0.504"
+        app:layout_constraintStart_toStartOf="@+id/imageView8"
+        app:layout_constraintTop_toBottomOf="@+id/imageView8" />
+
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="145dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="36dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/logo" />
+
+    <TextView
+        android:id="@+id/textView11"
+        android:layout_width="331dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/poppins_medium"
+        android:justificationMode="inter_word"
+        android:text="- reviewer for advanced networking quiz on friday (short description of the reviewer)"
+        android:textAlignment="center"
+        android:textColor="#585858"
+        android:textSize="13dp"
+        app:layout_constraintEnd_toEndOf="@+id/textView13"
+        app:layout_constraintHorizontal_bias="0.491"
+        app:layout_constraintStart_toStartOf="@+id/textView13"
+        app:layout_constraintTop_toBottomOf="@+id/textView13" />
+
+    <ImageView
+        android:id="@+id/imageView21"
+        android:layout_width="wrap_content"
+        android:layout_height="235dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/fcbg" />
+
+    <ImageView
+        android:id="@+id/imageView22"
+        android:layout_width="291dp"
+        android:layout_height="341dp"
+        android:layout_marginTop="10dp"
+        app:layout_constraintEnd_toEndOf="@+id/textView11"
+        app:layout_constraintHorizontal_bias="0.475"
+        app:layout_constraintStart_toStartOf="@+id/textView11"
+        app:layout_constraintTop_toBottomOf="@+id/textView11"
+        app:srcCompat="@drawable/cardshadow" />
+</androidx.constraintlayout.widget.ConstraintLayout>

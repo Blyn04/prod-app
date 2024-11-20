@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -37,7 +38,7 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
     private TextView streakTextView;
     private int streakCount = 0;
     private TextToSpeech textToSpeech;
-    private Button ttsButton;
+    private ImageButton ttsButton;
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
 
@@ -93,12 +94,25 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
             }
         });
 
+//        ttsButton.setOnClickListener(view -> {
+//            // Trigger TTS to read the current question
+//            Flashcard flashcard = flashcards.get(currentIndex);
+//            String questionText = flashcard.getQuestion();
+//            textToSpeech.speak(questionText, TextToSpeech.QUEUE_FLUSH, null, null);
+//        });
+
         ttsButton.setOnClickListener(view -> {
-            // Trigger TTS to read the current question
-            Flashcard flashcard = flashcards.get(currentIndex);
-            String questionText = flashcard.getQuestion();
-            textToSpeech.speak(questionText, TextToSpeech.QUEUE_FLUSH, null, null);
+            if (textToSpeech.isSpeaking()) {
+                textToSpeech.stop(); // Stop TTS if it is currently speaking
+                Toast.makeText(ViewFlashcardsActivity.this, "Stopped speaking", Toast.LENGTH_SHORT).show();
+            } else {
+                // Trigger TTS to read the current question
+                Flashcard flashcard = flashcards.get(currentIndex);
+                String questionText = flashcard.getQuestion();
+                textToSpeech.speak(questionText, TextToSpeech.QUEUE_FLUSH, null, null);
+            }
         });
+
 
         submitButton.setOnClickListener(view -> {
             Flashcard flashcard = flashcards.get(currentIndex);
@@ -387,7 +401,7 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         Button okButton = dialogView.findViewById(R.id.okButton);
 
         // Update the dialog message based on streak count
-        streakCountMessage.setText("You've reached a streak of " + streak + "!");
+        streakCountMessage.setText( streak + " Streak!!");
         streakMessage.setText(message);
 
         // Show the dialog
@@ -462,4 +476,14 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
                 });
 
     }
+
+    @Override
+    protected void onDestroy() {
+        if (textToSpeech != null) {
+            textToSpeech.stop();
+            textToSpeech.shutdown();
+        }
+        super.onDestroy();
+    }
+
 }

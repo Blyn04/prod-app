@@ -1,62 +1,176 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="16dp"
-    android:background="@drawable/dialog_background">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Add Reviewer"
-        android:textSize="20sp"
-        android:textColor="@android:color/black"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="12dp" />
+    <androidx.cardview.widget.CardView
+        android:layout_width="324dp"
+        android:layout_height="425dp"
+        android:layout_marginTop="16dp"
+        android:backgroundTint="@color/white"
+        app:cardCornerRadius="30dp"
+        app:cardElevation="20dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.492"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <EditText
-        android:id="@+id/reviewerNameEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Reviewer Title"
-        android:inputType="textPersonName"
-        android:padding="8dp"
-        android:background="@android:color/white"
-        android:layout_marginBottom="8dp" />
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            tools:context=".AddTaskPopUp">
 
-    <EditText
-        android:id="@+id/reviewerDescriptionEditText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Short Description"
-        android:inputType="textEmailAddress"
-        android:padding="8dp"
-        android:background="@android:color/white"
-        android:layout_marginBottom="16dp" />
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/titleinput"
+                android:layout_width="268dp"
+                android:layout_height="60dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="12dp"
+                app:boxCornerRadiusBottomEnd="15dp"
+                app:boxCornerRadiusBottomStart="15dp"
+                app:boxCornerRadiusTopEnd="15dp"
+                app:boxCornerRadiusTopStart="15dp"
+                app:boxStrokeColor="#80000000"
+                app:boxStrokeWidth="0.8dp"
+                app:counterTextColor="@color/black"
+                app:helperTextTextColor="@color/black"
+                app:hintTextColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView27"
+                app:placeholderTextColor="@color/black"
+                app:prefixTextColor="@color/black"
+                app:startIconDrawable="@drawable/edit"
+                app:suffixTextColor="@color/black">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="end">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/reviewerNameEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/poppins"
+                    android:hint="Enter title here..."
+                    android:paddingStart="50dp"
+                    android:textColor="#000000"
+                    android:textSize="11dp" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-        <Button
-            android:id="@+id/cancelButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Cancel"
-            android:backgroundTint="@android:color/darker_gray"
-            android:textColor="@android:color/white" />
+            <ImageView
+                android:id="@+id/imageView16"
+                android:layout_width="145dp"
+                android:layout_height="42dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.502"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/logo" />
 
-        <Button
-            android:id="@+id/saveButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Save"
-            android:backgroundTint="@android:color/holo_blue_light"
-            android:textColor="@android:color/white"
-            android:layout_marginStart="8dp" />
+            <TextView
+                android:id="@+id/textView26"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/poppins_bold"
+                android:text="*"
+                android:textColor="#F10000"
+                android:textSize="15dp"
+                app:layout_constraintStart_toEndOf="@+id/textView27"
+                app:layout_constraintTop_toTopOf="@+id/textView27" />
 
-    </LinearLayout>
-</LinearLayout>
+            <TextView
+                android:id="@+id/textView27"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="24dp"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Reviewer Title"
+                android:textColor="#000000"
+                android:textSize="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/imageView16" />
+
+            <TextView
+                android:id="@+id/textView28"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="20dp"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Short Description"
+                android:textColor="#000000"
+                android:textSize="15dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/titleinput" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/shortdesinput"
+                android:layout_width="268dp"
+                android:layout_height="120dp"
+                android:layout_marginStart="28dp"
+                android:layout_marginTop="8dp"
+                app:boxCornerRadiusBottomEnd="15dp"
+                app:boxCornerRadiusBottomStart="15dp"
+                app:boxCornerRadiusTopEnd="15dp"
+                app:boxCornerRadiusTopStart="15dp"
+                app:boxStrokeColor="#80000000"
+                app:boxStrokeWidth="0.8dp"
+                app:counterTextColor="@color/black"
+                app:helperTextTextColor="@color/black"
+                app:hintTextColor="@color/black"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView28"
+                app:placeholderTextColor="@color/black"
+                app:prefixTextColor="@color/black"
+                app:suffixTextColor="@color/black">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/reviewerDescriptionEditText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="top|start"
+                    android:hint="Enter short description here..."
+                    android:inputType="textMultiLine"
+                    android:lines="4"
+                    android:minLines="4"
+                    android:scrollbars="vertical"
+                    android:textColor="#000000"
+                    android:textColorHighlight="@color/black"
+                    android:textColorHint="#CC000000"
+                    android:textSize="11dp" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <Button
+                android:id="@+id/saveButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#EDB856"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Create Reviewer"
+                android:textColor="#333333"
+                android:textSize="11dp"
+                app:layout_constraintEnd_toEndOf="@+id/shortdesinput"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toStartOf="@+id/shortdesinput"
+                app:layout_constraintTop_toBottomOf="@+id/shortdesinput" />
+
+            <Button
+                android:id="@+id/cancelButton"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#EDB856"
+                android:fontFamily="@font/poppins_bold"
+                android:text="Cancel"
+                android:textColor="#333333"
+                android:textSize="11dp"
+                app:layout_constraintEnd_toEndOf="@+id/shortdesinput"
+                app:layout_constraintHorizontal_bias="0.055"
+                app:layout_constraintStart_toStartOf="@+id/shortdesinput"
+                app:layout_constraintTop_toBottomOf="@+id/shortdesinput" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

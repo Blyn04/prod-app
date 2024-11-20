@@ -1,9 +1,11 @@
     package com.example.moodchecker.adapter;
 
+    import android.media.Image;
     import android.view.LayoutInflater;
     import android.view.View;
     import android.view.ViewGroup;
     import android.widget.Button;
+    import android.widget.ImageButton;
     import android.widget.LinearLayout;
     import android.widget.RadioButton;
     import android.widget.TextView;
@@ -113,7 +115,7 @@
 
         public static class FlashcardViewHolder extends RecyclerView.ViewHolder {
             TextView questionTextView, answerTextView;
-            Button deleteButton;
+            ImageButton deleteButton;
             LinearLayout optionsContainer;
             RadioButton optionOne, optionTwo, optionThree, optionFour;
 

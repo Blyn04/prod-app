@@ -2,13 +2,14 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="16dp">
+    android:padding="12dp">
 
     <!-- Question Text -->
     <TextView
         android:id="@+id/questionTextView"
         android:text="Question"
-        android:textSize="18sp"
+        android:fontFamily="@font/poppins"
+        android:textSize="14sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
@@ -16,6 +17,8 @@
     <TextView
         android:id="@+id/answerTextView"
         android:text="Answer"
+        android:fontFamily="@font/poppins"
+        android:textSize="14sp"
         android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
@@ -62,9 +65,11 @@
     </LinearLayout>
 
     <!-- Delete Button -->
-    <Button
+    <ImageButton
         android:id="@+id/deleteButton"
-        android:text="Delete"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:background="@color/red"
+        android:contentDescription="Button description"
+        android:src="@drawable/ic_delete" />
 </LinearLayout>

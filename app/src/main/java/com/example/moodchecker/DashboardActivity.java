@@ -163,7 +163,7 @@ public class DashboardActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Navigate to Flashcards Activity
-                Intent flashcardsIntent = new Intent(DashboardActivity.this, FlashcardsActivity.class);
+                Intent flashcardsIntent = new Intent(DashboardActivity.this, ReviewerActivity.class);
                 startActivity(flashcardsIntent);
             }
         });
