@@ -1,5 +1,6 @@
 package com.example.moodchecker;
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -37,6 +38,7 @@ public class ProfileActivity extends AppCompatActivity {
     private ImageView profileAvatar;
     private ImageView badgeImageView;
     private int streak;
+    private Button btnLogout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,6 +50,7 @@ public class ProfileActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         btnEditSave = findViewById(R.id.btnEditSave);
+        btnLogout = findViewById(R.id.btnLogout);
 
         // Initialize UI components
         etName = findViewById(R.id.etName);
@@ -121,6 +124,8 @@ public class ProfileActivity extends AppCompatActivity {
             }
         });
         toggleEditing(false);
+
+        btnLogout.setOnClickListener(view -> logout());
 
         badgeImageView = findViewById(R.id.badge);
         streak = getUserStreak(); // Assuming you have a method to fetch the user's streak
@@ -267,6 +272,22 @@ public class ProfileActivity extends AppCompatActivity {
 //                    profileAvatar.setImageResource(R.drawable.avatar1);
 //                });
 //    }
+
+    private void logout() {
+        // Sign out the user from FirebaseAuth
+        mAuth.signOut();
+
+        // Display a Toast message
+        Toast.makeText(ProfileActivity.this, "Logged out successfully", Toast.LENGTH_SHORT).show();
+
+        // Redirect to Login Activity (replace LoginActivity with your actual login activity)
+        Intent intent = new Intent(ProfileActivity.this, WelcomePageActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+
+        // Optional: Finish ProfileActivity
+        finish();
+    }
 
     private void loadUserProfile() {
         // Get the current user from FirebaseAuth

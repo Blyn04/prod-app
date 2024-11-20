@@ -372,6 +372,11 @@
                 </LinearLayout>
             </HorizontalScrollView>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:orientation="horizontal">
 
             <!-- Save Changes Button -->
             <Button
@@ -394,6 +399,19 @@
                 android:paddingHorizontal="32dp"
                 android:paddingVertical="12dp"
                 android:text="Edit" />
+
+            <Button
+                android:id="@+id/btnLogout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:backgroundTint="#F5CBA7"
+                android:paddingHorizontal="32dp"
+                android:paddingVertical="12dp"
+                android:text="Logout"
+                android:layout_marginLeft="40dp"/>
+        </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

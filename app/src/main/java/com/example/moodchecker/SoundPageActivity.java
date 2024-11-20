@@ -80,6 +80,9 @@ public class SoundPageActivity extends AppCompatActivity {
             editor.putBoolean("rainSoundState", false);
             editor.putBoolean("coffeeSoundState", false);
             editor.apply();
+
+            rainSoundSwitch.setChecked(false);
+            coffeeShopSwitch.setChecked(false);
         });
     }
 
