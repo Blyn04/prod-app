@@ -1,59 +1,81 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#FFFFFF"
-    android:padding="16dp">
+    tools:context=".MoodPage">
 
-    <!-- Logo at the top (optional) -->
     <ImageView
-        android:id="@+id/logoImageView"
+        android:id="@+id/nadzface"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
+        android:layout_height="334dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/happy" />
 
-    <!-- Mood title -->
+    <ImageView
+        android:id="@+id/imageView8"
+        android:layout_width="145dp"
+        android:layout_height="42dp"
+        android:layout_marginTop="30dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/logo" />
+
     <TextView
         android:id="@+id/moodTitleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="You're feeling.."
-        android:textSize="24sp"
+        android:layout_marginTop="20dp"
+        android:fontFamily="@font/lilita_one"
+        android:text="You’re feeling.."
         android:textColor="#333333"
-        android:paddingTop="16dp" />
+        android:textSize="40dp"
+        app:layout_constraintEnd_toEndOf="@+id/imageView8"
+        app:layout_constraintStart_toStartOf="@+id/imageView8"
+        app:layout_constraintTop_toBottomOf="@+id/imageView8" />
 
-    <!-- Mood status -->
     <TextView
         android:id="@+id/moodStatusTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center"
+        android:fontFamily="@font/lilita_one"
         android:text="HAPPY"
-        android:textSize="48sp"
-        android:textStyle="bold"
-        android:textColor="#FF5722" />
+        android:textColor="#E8734E"
+        android:textSize="64dp"
+        app:layout_constraintEnd_toEndOf="@+id/moodTitleTextView"
+        app:layout_constraintStart_toStartOf="@+id/moodTitleTextView"
+        app:layout_constraintTop_toBottomOf="@+id/moodTitleTextView" />
 
-    <!-- Mood message -->
     <TextView
         android:id="@+id/moodMessageTextView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="We’re glad to see you’re feeling great! Keep that positive energy going..."
-        android:textSize="16sp"
-        android:textColor="#555555"
-        android:gravity="center" />
+        android:layout_width="305dp"
+        android:layout_height="79dp"
+        android:layout_marginTop="28dp"
+        android:fontFamily="@font/poppins_medium"
+        android:justificationMode="inter_word"
+        android:text="We’re glad to see you’re feeling great! Keep that positive energy going and spread it to those around you. If something made your day, keep it close to heart!"
+        android:textColor="#585858"
+        app:layout_constraintEnd_toEndOf="@+id/moodStatusTextView"
+        app:layout_constraintStart_toStartOf="@+id/moodStatusTextView"
+        app:layout_constraintTop_toBottomOf="@+id/moodStatusTextView" />
 
-    <!-- Continue button -->
     <Button
         android:id="@+id/continueButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="24dp"
+        android:layout_width="305dp"
+        android:layout_height="46dp"
+        android:layout_marginTop="32dp"
+        android:backgroundTint="#F4F2EF"
+        android:fontFamily="@font/poppins_bold"
         android:text="Continue to app"
-        android:textColor="#FFFFFF"
-        android:padding="12dp" />
-</LinearLayout>
+        android:textColor="#000000"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@+id/moodMessageTextView"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/moodMessageTextView"
+        app:layout_constraintTop_toBottomOf="@+id/moodMessageTextView" />
+</androidx.constraintlayout.widget.ConstraintLayout>

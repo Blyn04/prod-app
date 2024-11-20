@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -12,6 +13,7 @@ public class MoodPage extends AppCompatActivity {
     private TextView moodMessageTextView;
     private TextView moodStatusTextView;
     private Button continueButton;
+    private ImageView nadzFaceImageView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +24,7 @@ public class MoodPage extends AppCompatActivity {
         moodMessageTextView = findViewById(R.id.moodMessageTextView);
         moodStatusTextView = findViewById(R.id.moodStatusTextView);
         continueButton = findViewById(R.id.continueButton);
+        nadzFaceImageView = findViewById(R.id.nadzface);
 
         // Get the mood and message passed from MainActivity
         Intent intent = getIntent();
@@ -33,6 +36,8 @@ public class MoodPage extends AppCompatActivity {
         moodStatusTextView.setText(mood.toUpperCase());
         moodMessageTextView.setText(message);
 
+        changeMoodImage(mood);
+
         // Set up the continue button click listener to navigate to the Dashboard
         continueButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -43,6 +48,32 @@ public class MoodPage extends AppCompatActivity {
                 startActivity(dashboardIntent);
             }
         });
+    }
+
+    private void changeMoodImage(String mood) {
+        int imageResId = 0;
+
+        switch (mood.toLowerCase()) {
+            case "happy":
+                imageResId = R.drawable.happy; // happy.png
+                break;
+            case "calm":
+                imageResId = R.drawable.calm; // calm.png
+                break;
+            case "sick":
+                imageResId = R.drawable.sick; // sick.png
+                break;
+            case "tired":
+                imageResId = R.drawable.tired; // tired.png
+                break;
+            default:
+                // Set a default image if the mood is not recognized
+                imageResId = R.drawable.happy; // You can replace with a default image if needed
+                break;
+        }
+
+        // Set the ImageView's srcCompat to the correct image
+        nadzFaceImageView.setImageResource(imageResId);
     }
 
     // Optionally, you can keep the method for setting up other mood buttons if needed.
