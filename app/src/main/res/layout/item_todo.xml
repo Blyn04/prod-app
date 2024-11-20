@@ -17,13 +17,13 @@
         android:id="@+id/todoName"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="2"
+        android:layout_weight="1"
         android:text="Task Name"
         android:textSize="16sp" />
 
     <!-- TextView for Task Status -->
-    <TextView
-        android:id="@+id/todoStatus"
+    <Spinner
+        android:id="@+id/todoStatusSpinner"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"

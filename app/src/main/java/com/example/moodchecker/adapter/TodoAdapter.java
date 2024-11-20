@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -55,33 +57,40 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
     public void onBindViewHolder(@NonNull TodoViewHolder holder, int position) {
         TodoItem item = todoList.get(position);
         holder.name.setText(item.getName());
-        holder.status.setText(item.getStatus());
         holder.deadline.setText(item.getDeadline());
-
         holder.checkBox.setChecked(false);
 
-        // Set status text color based on task status
-        if (item.getStatus().equals("In Progress")) {
-            holder.status.setTextColor(ContextCompat.getColor(holder.status.getContext(), R.color.yellow));
-        } else if (item.getStatus().equals("Complete")) {
-            holder.status.setTextColor(ContextCompat.getColor(holder.status.getContext(), R.color.green));
-        } else if (item.getStatus().equals("Not Started")) {
-            holder.status.setTextColor(ContextCompat.getColor(holder.status.getContext(), R.color.red));
+        // Spinner setup: ArrayAdapter and selection
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
+                holder.itemView.getContext(),
+                R.array.task_status_array, // Array in strings.xml
+                android.R.layout.simple_spinner_item
+        );
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        holder.statusSpinner.setAdapter(adapter);
+
+        // Set Spinner selection based on status
+        int statusIndex = adapter.getPosition(item.getStatus());
+        if (statusIndex >= 0) {
+            holder.statusSpinner.setSelection(statusIndex);
         } else {
-            holder.status.setTextColor(ContextCompat.getColor(holder.status.getContext(), R.color.black));
+            holder.statusSpinner.setSelection(0); // Default to the first item if status is invalid
         }
 
-        // Set up the checkbox listener
-        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            Log.d("TodoAdapter", "Checkbox checked: " + isChecked);
-            if (isChecked) {
-                buttonView.setEnabled(false);
-                // Show confirmation dialog to remove the task
-                String taskName = item.getName();
-                showRemoveConfirmationDialog(holder.itemView.getContext(), taskName, position);
+        // Handle Spinner item selection change
+        holder.statusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String newStatus = parent.getItemAtPosition(position).toString();
+                item.setStatus(newStatus); // Update the status in the TodoItem
+                Log.d("TodoAdapter", "Status updated: " + newStatus);
             }
-        }
-        );
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Do nothing
+            }
+        });
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -90,6 +99,47 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
                 showTaskDetailsDialog(item, v.getContext());
             }
         });
+
+        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                    Log.d("TodoAdapter", "Checkbox checked: " + isChecked);
+                    if (isChecked) {
+                        buttonView.setEnabled(false);
+                        // Show confirmation dialog to remove the task
+                        String taskName = item.getName();
+                        showRemoveConfirmationDialog(holder.itemView.getContext(), taskName, position);
+                    }
+                }
+        );
+    }
+
+    private void updateTaskStatusInFirestore(String userId, String taskName, String newStatus) {
+        db.collection("users")
+                .document(userId)
+                .collection("tasks")
+                .whereEqualTo("name", taskName)
+                .get()
+                .addOnSuccessListener(querySnapshot -> {
+                    for (DocumentSnapshot document : querySnapshot.getDocuments()) {
+                        document.getReference().update("status", newStatus)
+                                .addOnSuccessListener(aVoid -> Log.d("TodoAdapter", "Status updated in Firestore"))
+                                .addOnFailureListener(e -> Log.e("TodoAdapter", "Error updating status", e));
+                    }
+                });
+    }
+
+
+    // Get the status color based on task status
+    private int getStatusColor(Context context, String status) {
+        switch (status) {
+            case "In Progress":
+                return ContextCompat.getColor(context, R.color.yellow);
+            case "Complete":
+                return ContextCompat.getColor(context, R.color.green);
+            case "Not Started":
+                return ContextCompat.getColor(context, R.color.red);
+            default:
+                return ContextCompat.getColor(context, R.color.black);
+        }
     }
 
     // Method to show the confirmation dialog when the checkbox is checked
@@ -102,7 +152,6 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
                     removeTaskFromFirestore(context, userId, taskName, position);
                 })
                 .setNegativeButton("No", (dialog, which) -> {
-                    // Uncheck the checkbox when the user clicks "No"
                     todoList.get(position).setChecked(false); // Update the model if you store the checked state
                     notifyItemChanged(position); // Refresh the item view
                     dialog.dismiss();
@@ -116,38 +165,30 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
         // Log the userId and taskName to debug
         Log.d("TodoAdapter", "Removing task with taskName: " + taskName + " for userId: " + userId);
 
-        // Ensure taskName is not null or empty
         if (taskName == null || taskName.isEmpty()) {
             showErrorDialog(context, "Invalid Task Name.");
             return;
         }
 
-        // Ensure userId is not null or empty
         if (userId == null || userId.isEmpty()) {
             showErrorDialog(context, "Invalid User ID.");
             return;
         }
 
-        // Reference to Firestore tasks collection
         CollectionReference tasksRef = db.collection("users")
                 .document(userId)
                 .collection("tasks");
 
-        // Query the tasks collection for the task by its name
         tasksRef.whereEqualTo("name", taskName)
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                        // Task found, proceed to delete
                         for (DocumentSnapshot document : task.getResult()) {
-                            // Delete the task document
                             tasksRef.document(document.getId())
                                     .delete()
                                     .addOnSuccessListener(aVoid -> {
                                         // Successfully deleted the task
                                         Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show();
-
-                                        // Update the RecyclerView after deletion
                                         todoList.remove(position);
                                         notifyItemRemoved(position);
                                     })
@@ -157,19 +198,14 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
                                     });
                         }
                     } else {
-                        // No task found with the specified name
                         Toast.makeText(context, "Task not found", Toast.LENGTH_SHORT).show();
                     }
                 })
                 .addOnFailureListener(e -> {
-                    // Handle query failure
                     showErrorDialog(context, "Error querying tasks: " + e.getMessage());
                 });
     }
 
-
-
-    // Method to show an error dialog
     private void showErrorDialog(Context context, String message) {
         new AlertDialog.Builder(context)
                 .setTitle("Error")
@@ -179,67 +215,56 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
                 .show();
     }
 
-    // Method to show the edit timer dialog
-    private void showTimerEditDialog(Context context, TodoItem item) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle("Edit Timer for " + item.getName());
-
-        // Create an EditText for entering the new timer value
-        final EditText input = new EditText(context);
-        input.setInputType(InputType.TYPE_CLASS_NUMBER);
-        input.setHint("Enter timer value in seconds");
-
-        builder.setView(input);
-
-        builder.setPositiveButton("Save", (dialog, which) -> {
-            String inputValue = input.getText().toString();
-            if (!inputValue.isEmpty()) {
-                try {
-                    long newTimerValue = Long.parseLong(inputValue) * 1000; // Convert to milliseconds
-                    item.setTimerDuration(newTimerValue); // Update the timer duration in the TodoItem
-                    notifyDataSetChanged(); // Notify the adapter to refresh the item display
-                } catch (NumberFormatException e) {
-                    // Handle invalid input
-                    showErrorDialog(context, "Invalid input. Please enter a valid number.");
-                }
-            }
-        });
-
-        builder.setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-        builder.create().show();
-    }
-
-    private void showTaskDetailsDialog(TodoItem task, Context context) {
-        // Inflate the custom layout
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View dialogView = inflater.inflate(R.layout.custom_timer_dialog, null);
-
-        // Initialize views from the custom layout
-        EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
-        Spinner statusSpinner = dialogView.findViewById(R.id.statusSpinner);
-        TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);
-        EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
-        EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
-        EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
-        Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
-        Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
-
-        // Prepopulate views with task data
-        taskNameEditText.setText(task.getName());
-        deadlineTextView.setText(task.getDeadline());
-        long timerDuration = task.getTimerDuration();
-        hoursEditText.setText(String.format("%02d", timerDuration / 3600000));
-        minutesEditText.setText(String.format("%02d", (timerDuration % 3600000) / 60000));
-        secondsEditText.setText(String.format("%02d", (timerDuration % 60000) / 1000));
-
-        // Create the dialog
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setView(dialogView);
-
-        AlertDialog dialog = builder.create();
-
-        // Set button click listeners
+//    private void showTaskDetailsDialog(TodoItem task, Context context) {
+//        LayoutInflater inflater = LayoutInflater.from(context);
+//        View dialogView = inflater.inflate(R.layout.custom_timer_dialog, null);
+//
+//        EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
+//        Spinner statusSpinner = dialogView.findViewById(R.id.todoStatusSpinner);
+//        TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);
+//        EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
+//        EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
+//        EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
+//        Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
+//        Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
+//
+//        taskNameEditText.setText(task.getName());
+//
+//        // List of possible statuses
+//        String[] statuses = {"Not Started", "In Progress", "Complete"};
+//
+//        // Find the index of task status in the list
+//        int statusIndex = -1;
+//        for (int i = 0; i < statuses.length; i++) {
+//            if (statuses[i].equals(task.getStatus())) {
+//                statusIndex = i;
+//                break;
+//            }
+//        }
+//
+//        // Debugging log to check the value of task.getStatus() and statusIndex
+//        Log.d("TodoAdapter", "Task status: " + task.getStatus());
+//        Log.d("TodoAdapter", "Status index: " + statusIndex);
+//
+//        // Set the status spinner selection
+//        if (statusIndex != -1) {
+//            statusSpinner.setSelection(statusIndex);
+//        } else {
+//            // Set to default if status is not found
+//            statusSpinner.setSelection(0);
+//        }
+//
+//        deadlineTextView.setText(task.getDeadline());
+//        long timerDuration = task.getTimerDuration();
+//        hoursEditText.setText(String.format("%02d", timerDuration / 3600000));
+//        minutesEditText.setText(String.format("%02d", (timerDuration % 3600000) / 60000));
+//        secondsEditText.setText(String.format("%02d", (timerDuration % 60000) / 1000));
+//
+//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//        builder.setView(dialogView);
+//
+//        AlertDialog dialog = builder.create();
+//
 //        startTimerButton.setOnClickListener(v -> {
 //            String hours = hoursEditText.getText().toString();
 //            String minutes = minutesEditText.getText().toString();
@@ -251,23 +276,91 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
 //                duration += Long.parseLong(minutes) * 60000;
 //                duration += Long.parseLong(seconds) * 1000;
 //            } catch (NumberFormatException e) {
-//                // Handle invalid input
 //                showErrorDialog(context, "Please enter valid time values.");
 //                return;
 //            }
 //
-//            // Update the task's timer and notify the adapter
 //            task.setTimerDuration(duration);
 //            notifyDataSetChanged();
 //
-//            // Start the timer activity
-//            Intent intent = new Intent(context, TimerActivity.class);
-//            intent.putExtra("taskName", task.getName());
-//            intent.putExtra("deadline", task.getDeadline());
-//            intent.putExtra("timerDuration", task.getTimerDuration());
-//            context.startActivity(intent);
+//            Intent serviceIntent = new Intent(context, TimerService.class);
+//            serviceIntent.putExtra("timerDuration", duration);
+//            ContextCompat.startForegroundService(context, serviceIntent);
 //            dialog.dismiss();
 //        });
+//
+//        stopTimerButton.setOnClickListener(v -> dialog.dismiss());
+//
+//        dialog.show();
+//    }
+
+    private void showTaskDetailsDialog(TodoItem task, Context context) {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View dialogView = inflater.inflate(R.layout.custom_timer_dialog, null);
+
+        EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
+        Spinner statusSpinner = dialogView.findViewById(R.id.todoStatusSpinner);
+        TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);
+        EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
+        EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
+        EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
+        Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
+        Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
+        Button saveButton = dialogView.findViewById(R.id.saveButton);  // Add a save button in your dialog
+
+        taskNameEditText.setText(task.getName());
+
+        // List of possible statuses
+        String[] statuses = {"Not Started", "In Progress", "Complete"};
+
+        // Find the index of task status in the list
+        int statusIndex = -1;
+        for (int i = 0; i < statuses.length; i++) {
+            if (statuses[i].equals(task.getStatus())) {
+                statusIndex = i;
+                break;
+            }
+        }
+
+        // Set the status spinner selection
+        if (statusIndex != -1) {
+            statusSpinner.setSelection(statusIndex);
+        } else {
+            // Set to default if status is not found
+            statusSpinner.setSelection(0);
+        }
+
+        deadlineTextView.setText(task.getDeadline());
+        long timerDuration = task.getTimerDuration();
+        hoursEditText.setText(String.format("%02d", timerDuration / 3600000));
+        minutesEditText.setText(String.format("%02d", (timerDuration % 3600000) / 60000));
+        secondsEditText.setText(String.format("%02d", (timerDuration % 60000) / 1000));
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setView(dialogView);
+
+        AlertDialog dialog = builder.create();
+
+        // Save button click listener
+        saveButton.setOnClickListener(v -> {
+            String newStatus = statusSpinner.getSelectedItem().toString();
+            String taskName = taskNameEditText.getText().toString();
+
+            // Get the current user's ID
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+            // Update the task status in Firestore
+            updateTaskStatusInFirestore(userId, taskName, newStatus);
+
+            // Update the task object with the new status
+            task.setStatus(newStatus);
+
+            // Notify the adapter that the item has been updated
+            notifyDataSetChanged();
+
+            // Dismiss the dialog
+            dialog.dismiss();
+        });
 
         startTimerButton.setOnClickListener(v -> {
             String hours = hoursEditText.getText().toString();
@@ -280,36 +373,25 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
                 duration += Long.parseLong(minutes) * 60000;
                 duration += Long.parseLong(seconds) * 1000;
             } catch (NumberFormatException e) {
-                // Handle invalid input
                 showErrorDialog(context, "Please enter valid time values.");
                 return;
             }
 
-            // Update the task's timer
             task.setTimerDuration(duration);
             notifyDataSetChanged();
 
-            // Start the timer service
             Intent serviceIntent = new Intent(context, TimerService.class);
             serviceIntent.putExtra("timerDuration", duration);
-            ContextCompat.startForegroundService(context, serviceIntent); // Requires API 26+
+            ContextCompat.startForegroundService(context, serviceIntent);
             dialog.dismiss();
         });
-
 
         stopTimerButton.setOnClickListener(v -> dialog.dismiss());
 
         dialog.show();
     }
 
-    // Method to format the timer into a string (e.g., "01:30:00")
-    private String formatTimer(long durationMillis) {
-        long hours = TimeUnit.MILLISECONDS.toHours(durationMillis);
-        long minutes = TimeUnit.MILLISECONDS.toMinutes(durationMillis) % 60;
-        long seconds = TimeUnit.MILLISECONDS.toSeconds(durationMillis) % 60;
 
-        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
-    }
 
     @Override
     public int getItemCount() {
@@ -321,13 +403,14 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
     }
 
     public static class TodoViewHolder extends RecyclerView.ViewHolder {
-        TextView name, status, deadline;
+        TextView name, deadline;
+        Spinner statusSpinner; // Changed from TextView to Spinner
         CheckBox checkBox;
 
         public TodoViewHolder(@NonNull View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.todoName);
-            status = itemView.findViewById(R.id.todoStatus);
+            statusSpinner = itemView.findViewById(R.id.todoStatusSpinner);
             deadline = itemView.findViewById(R.id.todoDeadline);
             checkBox = itemView.findViewById(R.id.todoCheckbox);
         }

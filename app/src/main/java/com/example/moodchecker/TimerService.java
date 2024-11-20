@@ -6,10 +6,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.provider.Settings;
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 
@@ -26,6 +30,8 @@ public class TimerService extends Service {
     public void onCreate() {
         super.onCreate();
         handler = new Handler();
+
+//        createNotificationChannel();
     }
 
     @Override
@@ -127,22 +133,117 @@ public class TimerService extends Service {
     }
 
 
-    private void triggerAlarm() {
-        // Play the alarm sound
-        mediaPlayer = MediaPlayer.create(this, R.raw.alarm); // Make sure alarm.mp3 is placed in res/raw
-        mediaPlayer.setOnCompletionListener(mp -> {
-            // Stop the service after the alarm sound finishes
-            stopSelf();
-        });
-        mediaPlayer.start(); // Start the alarm sound
+//    private void triggerAlarm() {
+//        // Play the alarm sound
+//        mediaPlayer = MediaPlayer.create(this, R.raw.alarm);
+//        if (mediaPlayer != null) {
+//            mediaPlayer.setOnCompletionListener(mp -> stopSelf());
+//            mediaPlayer.start();
+//            Log.d("TimerService", "Alarm sound started.");
+//
+//        } else {
+//            Log.e("TimerService", "MediaPlayer creation failed");
+//        }
+//
+//        // Show "Time's Up!" as a new notification
+//        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        if (manager != null) {
+//            Notification notification = createNotification("Time's Up!", "The timer has ended.");
+//            manager.notify(2, notification); // Use a different ID to show a new notification
+//        }
+//
+//        handler.postDelayed(() -> stopSelf(), 2000);
+//        stopForeground(true); // Remove the foreground service notification
+//        stopSelf(); // Stop the service
+//    }
 
-        // Optionally, you can show a notification with sound when the timer ends
-        Notification notification = createNotification("Time's Up!", "The timer has ended.");
+    private void triggerAlarm() {
+        // Set the audio stream to alarm to override silent mode
+        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        if (audioManager != null) {
+            // Set the alarm stream volume to the maximum
+            audioManager.setStreamVolume(
+                    AudioManager.STREAM_ALARM,
+                    audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
+                    0
+            );
+        }
+
+        // Initialize MediaPlayer and play alarm sound
+        try {
+            if (mediaPlayer == null) {
+                Log.d("TimerService", "Creating MediaPlayer for alarm sound...");
+                mediaPlayer = MediaPlayer.create(this, R.raw.alarm);  // This assumes the file is at res/raw/alarm.mp3
+            }
+
+            if (mediaPlayer != null) {
+                mediaPlayer.setOnCompletionListener(mp -> {
+                    Log.d("TimerService", "Alarm finished playing");
+                    mp.reset();
+                    mp.release();
+                    stopSelf();
+                });
+                mediaPlayer.start();  // Play the alarm
+                Log.d("TimerService", "Alarm sound started.");
+            } else {
+                Log.e("TimerService", "MediaPlayer creation failed. Cannot find the alarm sound.");
+            }
+        } catch (Exception e) {
+            Log.e("TimerService", "Error occurred while playing alarm sound: " + e.getMessage());
+        }
+
+        // Show "Time's Up!" notification
         NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         if (manager != null) {
-            manager.notify(NOTIFICATION_ID, notification); // Update notification
+            Notification notification = createNotification("Time's Up!", "The timer has ended.");
+            manager.notify(2, notification);  // Use a different ID to show a new notification
         }
+
+        stopForeground(true); // Remove the foreground service notification
+        handler.postDelayed(this::stopSelf, 2000); // Stop service after 2 seconds
+        stopSelf(); // Stop the service immediately
     }
+
+
+
+//    private void triggerAlarm() {
+//        AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+//        if (audioManager != null) {
+//            // Force music stream volume to max
+//            audioManager.setStreamVolume(
+//                    AudioManager.STREAM_MUSIC,
+//                    audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC),
+//                    0
+//            );
+//        }
+//
+//        // Initialize MediaPlayer and play alarm
+//        if (mediaPlayer == null) {
+//            mediaPlayer = MediaPlayer.create(this, R.raw.alarm);
+//        }
+//        if (mediaPlayer != null) {
+//            mediaPlayer.setOnCompletionListener(mp -> {
+//                mp.reset();
+//                mp.release();
+//                stopSelf(); // Stop the service after alarm finishes
+//            });
+//            mediaPlayer.start();
+//            Log.d("TimerService", "Alarm sound started.");
+//        } else {
+//            Log.e("TimerService", "MediaPlayer creation failed.");
+//        }
+//
+//        // Show "Time's Up!" notification
+//        NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+//        if (manager != null) {
+//            Notification notification = createNotification("Time's Up!", "The timer has ended.");
+//            manager.notify(2, notification);
+//        }
+//
+//        stopForeground(true); // Remove the foreground service notification
+//        handler.postDelayed(this::stopSelf, 2000); // Stop the service after delay
+//    }
+
 
 
     private void updateNotification(String timerText) {
@@ -161,11 +262,39 @@ public class TimerService extends Service {
                 .setContentTitle(title)
                 .setContentText(text)
                 .setSmallIcon(R.drawable.ic_timer) // Use your own icon here
-                .addAction(createPauseAction()) // Add a pause button
+//                .addAction(createPauseAction()) // Add a pause button
                 .setOngoing(true) // Make notification non-dismissible
                 .setContentIntent(openActivityPendingIntent) // Set the intent to open the TimerActivity
                 .build();
     }
+
+//    private Notification createNotification(String title, String text) {
+//        Intent openActivityIntent = new Intent(this, TimerActivity.class);
+//        PendingIntent openActivityPendingIntent = PendingIntent.getActivity(this, 0, openActivityIntent, PendingIntent.FLAG_IMMUTABLE);
+//
+//        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+//                .setContentTitle(title)
+//                .setContentText(text)
+//                .setSmallIcon(R.drawable.ic_timer)
+//                .setContentIntent(openActivityPendingIntent)
+//                .setOngoing(!"Time's Up!".equals(title)); // Make it dismissible only for "Time's Up!"
+//
+//        // Ensure no sound for the timer countdown, only the "Time's Up!" notification should have sound
+//        if ("Time's Up!".equals(title)) {
+//            builder.setSound(Settings.System.DEFAULT_RINGTONE_URI);  // Set the sound only for the final notification
+//        } else {
+//            builder.setSound(null);  // No sound for the countdown
+//        }
+//
+//        if (!"Time's Up!".equals(title)) {
+//            builder.addAction(createPauseAction());
+//        }
+//
+//        return builder.build();
+//    }
+
+
+
 
     private NotificationCompat.Action createPauseAction() {
 //        Intent pauseIntent = new Intent(this, TimerService.class);
@@ -189,11 +318,19 @@ public class TimerService extends Service {
             NotificationChannel channel = new NotificationChannel(
                     CHANNEL_ID,
                     "Timer Notifications",
-                    NotificationManager.IMPORTANCE_LOW
+                    NotificationManager.IMPORTANCE_HIGH
             );
             NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+            channel.setDescription("Notifications for timer events");
+            channel.enableLights(true);
+            channel.enableVibration(true);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+
             if (manager != null) {
                 manager.createNotificationChannel(channel);
+            } else {
+                Log.e("TimerService", "NotificationManager is null");
             }
         }
     }

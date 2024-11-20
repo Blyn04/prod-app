@@ -35,6 +35,7 @@ public class TodoItem {
     }
     public String getName() { return name; }
     public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
     public String getDeadline() { return deadline; }
     public long getTimerDuration() { return timerDuration; }
     public void setTimerDuration(long timerDuration) { this.timerDuration = timerDuration; }

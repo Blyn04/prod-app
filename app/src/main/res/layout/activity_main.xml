@@ -1,72 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="20dp"
-    android:background="#FFEBEE">
+    android:background="#FFFFFF"
+    tools:context=".MainActivity">
 
-    <!-- Display the question -->
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="wrap_content"
+        android:layout_height="664dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/moodcheckbg" />
+
     <TextView
         android:id="@+id/moodQuestion"
+        android:layout_width="323dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="360dp"
+        android:fontFamily="@font/lilita_one"
+        android:text="WHAT’S YOUR MOOD LIKE TODAY?"
+        android:textAlignment="center"
+        android:textColor="#FFFFFF"
+        android:textSize="36dp"
+        app:layout_constraintEnd_toEndOf="@+id/imageView5"
+        app:layout_constraintHorizontal_bias="0.485"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/imageView5" />
+
+    <ImageView
+        android:id="@+id/imageView6"
+        android:layout_width="145dp"
+        android:layout_height="42dp"
+        android:layout_marginBottom="20dp"
+        app:layout_constraintBottom_toTopOf="@+id/imageView5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.1"
+        app:layout_constraintStart_toStartOf="parent"
+        app:srcCompat="@drawable/logo" />
+
+    <TextView
+        android:id="@+id/textView5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="WHAT'S YOUR MOOD LIKE TODAY"
-        android:textSize="24sp"
-        android:textColor="#333333"
-        android:layout_marginBottom="20dp"/>
+        android:layout_marginTop="8dp"
+        android:fontFamily="@font/poppins_semibold_italic"
+        android:text="I'm feeling..."
+        android:textColor="#FFFFFF"
+        android:textSize="15dp"
+        app:layout_constraintEnd_toEndOf="@+id/moodQuestion"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="@+id/moodQuestion"
+        app:layout_constraintTop_toBottomOf="@+id/moodQuestion" />
 
-    <!-- Display the date -->
     <TextView
         android:id="@+id/dateTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="24 March"
-        android:textSize="18sp"
-        android:textColor="#888888"
-        android:layout_marginBottom="30dp"/>
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/poppins_bold"
+        android:text="15 November 2024"
+        android:textColor="#FFFFFF"
+        android:textSize="12dp"
+        app:layout_constraintEnd_toEndOf="@+id/sickButton"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="@+id/calmButton"
+        app:layout_constraintTop_toBottomOf="@+id/calmButton" />
 
-    <!-- Mood options as buttons -->
     <Button
         android:id="@+id/sleepyButton"
-        android:layout_width="wrap_content"
+        android:layout_width="148dp"
         android:layout_height="wrap_content"
-        android:text="Sleepy"
-        android:backgroundTint="#FFCCBC"
-        android:layout_margin="8dp"/>
-
-    <Button
-        android:id="@+id/sickButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Sick"
-        android:backgroundTint="#FFF176"
-        android:layout_margin="8dp"/>
-
-    <Button
-        android:id="@+id/calmButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Calm"
-        android:backgroundTint="#B3E5FC"
-        android:layout_margin="8dp"/>
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="32dp"
+        android:backgroundTint="#52B0D3"
+        android:fontFamily="@font/poppins_bold"
+        android:text="Tired"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
     <Button
         android:id="@+id/happyButton"
-        android:layout_width="wrap_content"
+        android:layout_width="148dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="28dp"
+        android:backgroundTint="#E9734E"
+        android:fontFamily="@font/poppins_bold"
         android:text="Happy"
-        android:backgroundTint="#D1C4E9"
-        android:layout_margin="8dp"/>
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toStartOf="@+id/sleepyButton"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView5" />
 
     <Button
-        android:id="@+id/historyButton"
-        android:layout_width="wrap_content"
+        android:id="@+id/calmButton"
+        android:layout_width="148dp"
         android:layout_height="wrap_content"
-        android:text="View Mood History"
-        android:backgroundTint="#FFAB91"
-        android:layout_marginTop="20dp"/>
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="20dp"
+        android:backgroundTint="#8A9ED1"
+        android:fontFamily="@font/poppins_bold"
+        android:text="Calm"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toStartOf="@+id/sickButton"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/happyButton"
+        app:layout_constraintTop_toBottomOf="@+id/happyButton" />
 
-</LinearLayout>
+    <Button
+        android:id="@+id/sickButton"
+        android:layout_width="148dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:backgroundTint="#7ABAA2"
+        android:fontFamily="@font/poppins_bold"
+        android:text="Sick"
+        android:textColor="#FFFFFF"
+        app:layout_constraintEnd_toEndOf="@+id/sleepyButton"
+        app:layout_constraintTop_toBottomOf="@+id/sleepyButton" />
+</androidx.constraintlayout.widget.ConstraintLayout>

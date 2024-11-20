@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
             "This peaceful energy is your superpower. Let it guide you through your day."
     );
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

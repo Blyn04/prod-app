@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -34,9 +35,9 @@ import java.util.List;
 import java.util.Random;
 
 public class DashboardActivity extends AppCompatActivity {
-    private Button flashcardsButton;
+    private ImageButton flashcardsButton;
     private Button idCardProfileButton;
-    private Button playSoundButton;
+    private ImageButton playSoundButton;
     private TextView moodMessageTextView;
     private RecyclerView todoRecyclerView;
     private TodoAdapter todoAdapter;
@@ -153,11 +154,6 @@ public class DashboardActivity extends AppCompatActivity {
 
         // Initialize data
         todoList = new ArrayList<>();
-//        todoList.add(new TodoItem("Networking HW#1", "In Progress", "09/12/24"));
-//        todoList.add(new TodoItem("Networking HW#1", "Complete", "09/12/24"));
-//        todoList.add(new TodoItem("Networking HW#1", "Not Started", "09/12/24"));
-//        todoList.add(new TodoItem("Networking HW#1", "Not Started", "09/12/24"));
-//        todoList.add(new TodoItem("Networking HW#1", "In Progress", "09/12/24"));
 
         // Set adapter
         todoAdapter = new TodoAdapter(todoList);
@@ -197,11 +193,6 @@ public class DashboardActivity extends AppCompatActivity {
                 EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
                 Spinner statusSpinner = dialogView.findViewById(R.id.statusSpinner);
                 TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);  // Updated to TextView for date picker
-//                EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
-//                EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
-//                EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
-//                Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
-//                Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
 
                 // Set up the spinner with status options
                 ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this,
@@ -224,6 +215,12 @@ public class DashboardActivity extends AppCompatActivity {
                                         .setMessage("Please enter a task name.")
                                         .setPositiveButton("OK", null)
                                         .show();
+
+//                                AlertDialog dialogx = builder.create();
+//                                dialogx.getWindow().setBackgroundDrawableResource(R.drawable.rounded_dialog);
+//
+//                                dialogx.show();
+
                                 return;  // Don't proceed to save the task
                             }
 
