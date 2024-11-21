@@ -12,14 +12,20 @@
         android:layout_height="wrap_content">
 
         <RadioButton
-            android:id="@+id/redColor"
-            android:text="Red"
+            android:id="@+id/yellowColor"
+            android:text="Yellow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
         <RadioButton
-            android:id="@+id/greenColor"
-            android:text="Green"
+            android:id="@+id/orangeColor"
+            android:text="Orange"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <RadioButton
+            android:id="@+id/pinkColor"
+            android:text="Pink"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
 
@@ -30,14 +36,8 @@
             android:layout_height="wrap_content" />
 
         <RadioButton
-            android:id="@+id/yellowColor"
-            android:text="Yellow"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <RadioButton
-            android:id="@+id/purpleColor"
-            android:text="Purple"
+            android:id="@+id/greenColor"
+            android:text="Green"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </RadioGroup>
@@ -46,5 +46,7 @@
         android:id="@+id/applyColorButton"
         android:text="Apply"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:backgroundTint="#F4B74F"
+        android:fontFamily="@font/poppins_bold" />
 </LinearLayout>

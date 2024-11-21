@@ -30,7 +30,7 @@ public class ProfileActivity extends AppCompatActivity {
     private EditText etName, etGmail;
     private Button btnEditSave;
     private boolean isEditing = false;
-    private ImageView colorOption1, colorOption2, colorOption3, avatarOption1, avatarOption2, avatarOption3, avatarOption4, avatarOption5, avatarOption6, avatarOption7, avatarOption8, avatarOption9, avatarOption10;
+    private ImageView colorOption1, colorOption2, colorOption3, colorOption4, colorOption5, colorOption6, avatarOption1, avatarOption2, avatarOption3, avatarOption4, avatarOption5, avatarOption6, avatarOption7, avatarOption8, avatarOption9, avatarOption10;
     private LinearLayout idCardSection;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -58,6 +58,9 @@ public class ProfileActivity extends AppCompatActivity {
         colorOption1 = findViewById(R.id.colorOption1);
         colorOption2 = findViewById(R.id.colorOption2);
         colorOption3 = findViewById(R.id.colorOption3);
+        colorOption4 = findViewById(R.id.colorOption4);
+        colorOption5 = findViewById(R.id.colorOption5);
+        colorOption6 = findViewById(R.id.colorOption6);
 
         avatarOption1 = findViewById(R.id.avatarOption1);
         avatarOption2 = findViewById(R.id.avatarOption2);
@@ -73,9 +76,12 @@ public class ProfileActivity extends AppCompatActivity {
         profileAvatar = findViewById(R.id.profileAvatar);
 
         // Set click listeners for color options
-        colorOption1.setOnClickListener(view -> updateColor("#A3E4D7"));
-        colorOption2.setOnClickListener(view -> updateColor("#FAD7A0"));
-        colorOption3.setOnClickListener(view -> updateColor("#F5B7B1"));
+        colorOption1.setOnClickListener(view -> updateColor("#BCDDD1"));
+        colorOption2.setOnClickListener(view -> updateColor("#F9DBA7"));
+        colorOption3.setOnClickListener(view -> updateColor("#F1D7DD"));
+        colorOption4.setOnClickListener(view -> updateColor("#F4B9A7"));
+        colorOption5.setOnClickListener(view -> updateColor("#B3DCEC"));
+        colorOption6.setOnClickListener(view -> updateColor("#C4CFE8"));
 
         // Set click listeners for avatar options
         avatarOption1.setOnClickListener(view -> updateAvatar(1));

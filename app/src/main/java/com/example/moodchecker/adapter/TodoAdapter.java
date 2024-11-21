@@ -7,6 +7,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -309,6 +310,13 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
         Button saveButton = dialogView.findViewById(R.id.saveButton);  // Add a save button in your dialog
 
         taskNameEditText.setText(task.getName());
+
+        hoursEditText.requestFocus();
+        hoursEditText.setSelection(hoursEditText.getText().length());  // Ensure the cursor is at the end of the input field
+
+        InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.showSoftInput(hoursEditText, InputMethodManager.SHOW_IMPLICIT);
+
 
         // List of possible statuses
         String[] statuses = {"Not Started", "In Progress", "Complete"};

@@ -7,28 +7,30 @@
     <!-- Question Text -->
     <TextView
         android:id="@+id/questionTextView"
-        android:text="Question"
-        android:fontFamily="@font/poppins"
-        android:textSize="14sp"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins"
+        android:text="Question"
+        android:textColor="#000000"
+        android:textSize="14sp" />
 
     <!-- Answer Text for non-multiple choice questions -->
     <TextView
         android:id="@+id/answerTextView"
-        android:text="Answer"
-        android:fontFamily="@font/poppins"
-        android:textSize="14sp"
-        android:visibility="gone"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/poppins"
+        android:text="Answer"
+        android:textColor="#000000"
+        android:textSize="14sp"
+        android:visibility="gone" />
 
     <!-- Options Container for Multiple Choice -->
     <LinearLayout
         android:id="@+id/optionsContainer"
-        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:visibility="gone">
 
         <RadioGroup
@@ -39,27 +41,31 @@
 
             <RadioButton
                 android:id="@+id/optionOne"
-                android:text="Option 1"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Option 1"
+                android:textColor="#000000" />
 
             <RadioButton
                 android:id="@+id/optionTwo"
-                android:text="Option 2"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Option 2"
+                android:textColor="#000000" />
 
             <RadioButton
                 android:id="@+id/optionThree"
-                android:text="Option 3"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Option 3"
+                android:textColor="#000000" />
 
             <RadioButton
                 android:id="@+id/optionFour"
-                android:text="Option 4"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:text="Option 4"
+                android:textColor="#000000" />
         </RadioGroup>
 
     </LinearLayout>
@@ -69,7 +75,7 @@
         android:id="@+id/deleteButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/red"
+        android:background="#00FFFFFF"
         android:contentDescription="Button description"
         android:src="@drawable/ic_delete" />
 </LinearLayout>

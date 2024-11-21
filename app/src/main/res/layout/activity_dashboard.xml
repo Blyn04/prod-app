@@ -9,18 +9,17 @@
 
     <Button
         android:id="@+id/removeTaskButton"
-        android:layout_width="161dp"
+        android:layout_width="150dp"
         android:layout_height="40dp"
-        android:layout_marginTop="260dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginTop="212dp"
+        android:layout_marginEnd="4dp"
         android:backgroundTint="#888888"
         android:fontFamily="@font/poppins_bold"
         android:text="Remove Task"
         android:textColor="#FFFFFF"
         android:textSize="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView12"
-        android:visibility="gone"/>
+        app:layout_constraintEnd_toEndOf="@+id/todoRecyclerView"
+        app:layout_constraintTop_toBottomOf="@+id/textView12" />
 
     <TextView
         android:id="@+id/textView13"
@@ -31,8 +30,7 @@
         android:text="What would you like to do?"
         android:textColor="#333333"
         android:textSize="29dp"
-        app:layout_constraintEnd_toEndOf="@+id/addTaskButton"
-        app:layout_constraintHorizontal_bias="0.448"
+        app:layout_constraintEnd_toEndOf="@+id/removeTaskButton"
         app:layout_constraintStart_toStartOf="@+id/addTaskButton"
         app:layout_constraintTop_toBottomOf="@+id/addTaskButton" />
 
@@ -40,7 +38,7 @@
         android:id="@+id/flashcardsButton"
         android:layout_width="164dp"
         android:layout_height="163dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="4dp"
         android:src="@drawable/reviewbtn"
         app:layout_constraintEnd_toEndOf="@+id/textView13"
@@ -50,7 +48,7 @@
         android:id="@+id/playSoundButton"
         android:layout_width="164dp"
         android:layout_height="163dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="15dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toStartOf="@+id/flashcardsButton"
         app:layout_constraintHorizontal_bias="1.0"
@@ -60,7 +58,7 @@
 
     <Button
         android:id="@+id/addTaskButton"
-        android:layout_width="161dp"
+        android:layout_width="150dp"
         android:layout_height="40dp"
         android:layout_marginTop="212dp"
         android:backgroundTint="#EDB856"
@@ -68,8 +66,7 @@
         android:text="Add Task"
         android:textColor="#FFFFFF"
         android:textSize="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.421"
+        app:layout_constraintEnd_toStartOf="@+id/removeTaskButton"
         app:layout_constraintStart_toStartOf="@+id/textView12"
         app:layout_constraintTop_toBottomOf="@+id/textView12" />
 
@@ -150,13 +147,13 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/todoRecyclerView"
-        android:layout_width="match_parent"
+        android:layout_width="331dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toTopOf="@+id/addTaskButton"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.435"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView12"
-        app:layout_constraintVertical_bias="0.277" />
+        app:layout_constraintVertical_bias="0.578" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

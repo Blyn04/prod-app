@@ -70,71 +70,72 @@ public class SoundPageActivity extends AppCompatActivity {
 
 //        rainSoundSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
 //            if (isChecked) {
-//                soundManager.playBackgroundSound(SoundPageActivity.this, R.raw.rain);
+//                rainMediaPlayer = MediaPlayer.create(SoundPageActivity.this, R.raw.rain);
+//                rainMediaPlayer.start();
 //            } else {
-//                soundManager.stopAllSounds();
+//                if (rainMediaPlayer != null) {
+//                    rainMediaPlayer.stop();
+//                    rainMediaPlayer.release();
+//                }
 //            }
 //            saveSoundPreferences();
 //        });
 //
-//
 //        coffeeShopSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
 //            if (isChecked) {
-//                soundManager.playBackgroundSound(SoundPageActivity.this, R.raw.coffee);
+//                coffeeShopMediaPlayer = MediaPlayer.create(SoundPageActivity.this, R.raw.coffee);
+//                coffeeShopMediaPlayer.start();
 //            } else {
-//                soundManager.stopAllSounds();
+//                if (coffeeShopMediaPlayer != null) {
+//                    coffeeShopMediaPlayer.stop();
+//                    coffeeShopMediaPlayer.release();
+//                }
 //            }
 //            saveSoundPreferences();
 //        });
 
         rainSoundSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                rainMediaPlayer = MediaPlayer.create(SoundPageActivity.this, R.raw.rain);
-                rainMediaPlayer.start();
-            } else {
-                if (rainMediaPlayer != null) {
-                    rainMediaPlayer.stop();
-                    rainMediaPlayer.release();
+            try {
+                if (isChecked) {
+                    if (rainMediaPlayer == null) {
+                        rainMediaPlayer = MediaPlayer.create(SoundPageActivity.this, R.raw.rain);
+                    }
+                    if (!rainMediaPlayer.isPlaying()) {
+                        rainMediaPlayer.start();
+                    }
+                } else {
+                    if (rainMediaPlayer != null && rainMediaPlayer.isPlaying()) {
+                        rainMediaPlayer.stop();
+                        rainMediaPlayer.release();
+                        rainMediaPlayer = null; // Set to null after releasing
+                    }
                 }
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
             }
-            saveSoundPreferences();
         });
 
         coffeeShopSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            if (isChecked) {
-                coffeeShopMediaPlayer = MediaPlayer.create(SoundPageActivity.this, R.raw.coffee);
-                coffeeShopMediaPlayer.start();
-            } else {
-                if (coffeeShopMediaPlayer != null) {
-                    coffeeShopMediaPlayer.stop();
-                    coffeeShopMediaPlayer.release();
+            try {
+                if (isChecked) {
+                    if (coffeeShopMediaPlayer == null) {
+                        coffeeShopMediaPlayer = MediaPlayer.create(SoundPageActivity.this, R.raw.coffee);
+                    }
+                    if (!coffeeShopMediaPlayer.isPlaying()) {
+                        coffeeShopMediaPlayer.start();
+                    }
+                } else {
+                    if (coffeeShopMediaPlayer != null && coffeeShopMediaPlayer.isPlaying()) {
+                        coffeeShopMediaPlayer.stop();
+                        coffeeShopMediaPlayer.release();
+                        coffeeShopMediaPlayer = null; // Set to null after releasing
+                    }
                 }
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
             }
-            saveSoundPreferences();
         });
 
-//        stopButton.setOnClickListener(v -> {
-//
-//            if (rainMediaPlayer != null) {
-//                rainMediaPlayer.stop();
-//                rainMediaPlayer.release();
-//            }
-//            if (coffeeShopMediaPlayer != null) {
-//                coffeeShopMediaPlayer.stop();
-//                coffeeShopMediaPlayer.release();
-//            }
-//
-//            soundManager.stopAllSounds();
-//
-//
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putBoolean("rainSoundState", false);
-//            editor.putBoolean("coffeeSoundState", false);
-//            editor.apply();
-//
-//            rainSoundSwitch.setChecked(false);
-//            coffeeShopSwitch.setChecked(false);
-//        });
 
         stopButton.setOnClickListener(v -> {
             if (rainMediaPlayer != null) {

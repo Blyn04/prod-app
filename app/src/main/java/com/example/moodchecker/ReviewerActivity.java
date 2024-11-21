@@ -1,6 +1,7 @@
 package com.example.moodchecker;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.PorterDuff;
 import android.os.Bundle;
@@ -49,16 +50,16 @@ public class ReviewerActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
-
-        backButton = findViewById(R.id.backButton);
+//
+//        backButton = findViewById(R.id.backButton);
         createNewReviewerButton = findViewById(R.id.createNewReviewerButton);
 
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+//        backButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                onBackPressed();
+//            }
+//        });
 
         createNewReviewerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -168,7 +169,7 @@ public class ReviewerActivity extends AppCompatActivity {
         // Set click listener for the 3-dots menu
         moreOptionsIcon.setOnClickListener(v -> {
 
-            moreOptionsIcon.setColorFilter(getResources().getColor(R.color.red), PorterDuff.Mode.SRC_IN);
+            moreOptionsIcon.setColorFilter(getResources().getColor(R.color.blue), PorterDuff.Mode.SRC_IN);
 
             // Create and show the PopupMenu
             PopupMenu popupMenu = new PopupMenu(ReviewerActivity.this, v);
@@ -293,33 +294,57 @@ public class ReviewerActivity extends AppCompatActivity {
             View folderItem = folderGrid.getChildAt(i);
             TextView folderNameTextView = folderItem.findViewById(R.id.folderNameTextView);
 
+//            if (folderNameTextView != null && folderNameTextView.getText().toString().equals(reviewerName)) {
+//                // Change the color of the folder icon only
+//                int colorCode = getColorCode(color);
+//                ImageView folderIcon = folderItem.findViewById(R.id.folderIcon);
+//                folderIcon.setColorFilter(colorCode, PorterDuff.Mode.SRC_IN);
+//
+//                break;
+//            }
+
             if (folderNameTextView != null && folderNameTextView.getText().toString().equals(reviewerName)) {
-                // Change the color of the folder icon only
-                int colorCode = getColorCode(color);
+                // Call getColorCode method and pass the context
+                int colorCode = getColorCode(folderNameTextView.getContext(), color); // Pass the context from TextView
+
+                // Find the folder icon ImageView
                 ImageView folderIcon = folderItem.findViewById(R.id.folderIcon);
+
+                // Set the color filter on the folder icon
                 folderIcon.setColorFilter(colorCode, PorterDuff.Mode.SRC_IN);
 
                 break;
             }
+
         }
     }
 
-    private int getColorCode(String colorName) {
-        switch (colorName) {
-            case "Red":
-                return Color.RED;
-            case "Green":
-                return Color.GREEN;
-            case "Blue":
-                return Color.BLUE;
-            case "Yellow":
-                return Color.YELLOW;
-            case "Purple":
-                return Color.parseColor("#800080"); // Purple color code
-            default:
-                return Color.WHITE; // Default color
+//    private int getColorCode(String colorName) {
+//        switch (colorName) {
+//            case "Red":
+//                return Color.RED;
+//            case "Green":
+//                return Color.GREEN;
+//            case "Blue":
+//                return Color.BLUE;
+//            case "Yellow":
+//                return Color.YELLOW;
+//            case "Purple":
+//                return Color.parseColor("#800080"); // Purple color code
+//            default:
+//                return Color.WHITE; // Default color
+//        }
+//    }
+
+    private int getColorCode(Context context, String colorName) {
+        int colorId = context.getResources().getIdentifier(colorName.toLowerCase(), "color", context.getPackageName());
+        if (colorId != 0) {
+            return context.getColor(colorId);
+        } else {
+            return context.getColor(R.color.white); // Default color (white) if no match is found
         }
     }
+
 
     // Show the rename dialog
     private void showRenameDialog(String oldName) {

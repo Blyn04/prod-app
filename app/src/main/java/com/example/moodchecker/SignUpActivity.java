@@ -37,6 +37,11 @@ public class SignUpActivity extends AppCompatActivity {
         // Initialize Firebase Auth
         FirebaseApp.initializeApp(this);
         db = FirebaseFirestore.getInstance();
+
+        if (db == null) {
+            throw new IllegalStateException("Firestore is not initialized");
+        }
+
         mAuth = FirebaseAuth.getInstance();
 
         // Initialize UI elements
@@ -75,6 +80,13 @@ public class SignUpActivity extends AppCompatActivity {
     }
 
     private void checkUsernameAvailability(String username, String email, String password) {
+
+        db = FirebaseFirestore.getInstance();
+
+        if (db == null) {
+            throw new IllegalStateException("Firestore is not initialized");
+        }
+
         // Check if the username already exists in Firestore
         db.collection("users")
                 .whereEqualTo("username", username)

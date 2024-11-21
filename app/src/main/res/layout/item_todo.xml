@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="50dp"
     android:orientation="horizontal"
     android:padding="8dp">
 
@@ -19,27 +19,28 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:text="Task Name"
-        android:textSize="16sp" />
+        android:textColor="#000000"
+        android:textSize="14sp" />
 
     <!-- TextView for Task Status -->
     <Spinner
         android:id="@+id/todoStatusSpinner"
-        android:layout_width="0dp"
+        android:layout_width="80dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
         android:text="Status"
-        android:textSize="14sp"
-        android:textColor="@android:color/holo_orange_dark" />
+        android:textColor="#000000"
+        android:textSize="12sp" />
 
     <!-- TextView for Task Deadline -->
     <TextView
         android:id="@+id/todoDeadline"
-        android:layout_width="0dp"
+        android:layout_width="15dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="center"
         android:text="MM/DD/YY"
-        android:textSize="14sp"
-        android:textColor="@android:color/darker_gray" />
+        android:textColor="#000000"
+        android:textSize="14sp" />
 </LinearLayout>
