@@ -161,6 +161,7 @@
             android:fontFamily="@font/poppins"
             android:hint="Password"
             android:paddingStart="50dp"
+            android:inputType="textPassword"
             android:textColor="#000000"
             android:textColorHint="#000000"
             android:textColorLink="#000000"
