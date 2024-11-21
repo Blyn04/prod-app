@@ -12,6 +12,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -351,47 +352,63 @@ public class FlashcardsActivity extends AppCompatActivity {
             startActivity(intent);
         });
 
+//        adapter.setDeleteCallback((flashcard, position) -> {
+//            FirebaseFirestore dbs = FirebaseFirestore.getInstance();
+//            FirebaseAuth mAuths = FirebaseAuth.getInstance();
+//
+//            String userIds = mAuths.getCurrentUser().getUid();
+//            if (userId == null || reviewerId == null) {
+//                Toast.makeText(this, "User or Reviewer ID is missing!", Toast.LENGTH_SHORT).show();
+//                return;
+//            }
+//
+//            CollectionReference flashcardsRefs = dbs.collection("users")
+//                    .document(userIds)
+//                    .collection("reviewer")
+//                    .document(reviewerId)
+//                    .collection("flashcards");
+//
+//            // Query Firestore for the document to delete
+//            flashcardsRefs.whereEqualTo("question", flashcard.getQuestion())
+//                    .whereEqualTo("answer", flashcard.getAnswer())
+//                    .get()
+//                    .addOnSuccessListener(queryDocumentSnapshots -> {
+//                        if (!queryDocumentSnapshots.isEmpty()) {
+//                            for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+//                                document.getReference().delete()
+//                                        .addOnSuccessListener(aVoid -> {
+//                                            // Remove the item from the RecyclerView list
+//                                            flashcards.remove(position);
+//                                            adapter.notifyItemRemoved(position);
+//                                            Toast.makeText(this, "Flashcard deleted", Toast.LENGTH_SHORT).show();
+//                                        })
+//                                        .addOnFailureListener(e -> {
+//                                            Toast.makeText(this, "Failed to delete flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                                        });
+//                            }
+//                        } else {
+//                            Toast.makeText(this, "Flashcard not found in Firestore", Toast.LENGTH_SHORT).show();
+//                        }
+//                    })
+//                    .addOnFailureListener(e -> {
+//                        Toast.makeText(this, "Failed to query Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+//                    });
+//        });
+
         adapter.setDeleteCallback((flashcard, position) -> {
-            FirebaseFirestore dbs = FirebaseFirestore.getInstance();
-            FirebaseAuth mAuths = FirebaseAuth.getInstance();
-
-            String userIds = mAuths.getCurrentUser().getUid();
-            if (userId == null || reviewerId == null) {
-                Toast.makeText(this, "User or Reviewer ID is missing!", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            CollectionReference flashcardsRefs = dbs.collection("users")
-                    .document(userIds)
-                    .collection("reviewer")
-                    .document(reviewerId)
-                    .collection("flashcards");
-
-            // Query Firestore for the document to delete
-            flashcardsRefs.whereEqualTo("question", flashcard.getQuestion())
-                    .whereEqualTo("answer", flashcard.getAnswer())
-                    .get()
-                    .addOnSuccessListener(queryDocumentSnapshots -> {
-                        if (!queryDocumentSnapshots.isEmpty()) {
-                            for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
-                                document.getReference().delete()
-                                        .addOnSuccessListener(aVoid -> {
-                                            // Remove the item from the RecyclerView list
-                                            flashcards.remove(position);
-                                            adapter.notifyItemRemoved(position);
-                                            Toast.makeText(this, "Flashcard deleted", Toast.LENGTH_SHORT).show();
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Toast.makeText(this, "Failed to delete flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                                        });
-                            }
-                        } else {
-                            Toast.makeText(this, "Flashcard not found in Firestore", Toast.LENGTH_SHORT).show();
-                        }
+            // Display confirmation dialog
+            new AlertDialog.Builder(FlashcardsActivity.this)
+                    .setTitle("Delete Flashcard")
+                    .setMessage("Are you sure you want to delete this flashcard?")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+                        // If user clicks Yes, proceed with deletion
+                        deleteFlashcard(flashcard, position);
                     })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(this, "Failed to query Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    });
+                    .setNegativeButton("No", (dialog, which) -> {
+                        // If user clicks No, dismiss the dialog and don't delete
+                        dialog.dismiss();
+                    })
+                    .show();
         });
 
         // Assuming reviewerId is already passed from the previous activity
@@ -423,6 +440,50 @@ public class FlashcardsActivity extends AppCompatActivity {
                 .addOnFailureListener(e -> {
                     Log.e("FlashcardsActivity", "Error fetching reviewer data", e);
                     Toast.makeText(FlashcardsActivity.this, "Failed to load reviewer data", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void deleteFlashcard(Flashcard flashcard, int position) {
+        FirebaseFirestore dbs = FirebaseFirestore.getInstance();
+        FirebaseAuth mAuths = FirebaseAuth.getInstance();
+        String userIds = mAuths.getCurrentUser().getUid();
+        String reviewerId = getIntent().getStringExtra("reviewerId");
+
+        if (userIds == null || reviewerId == null) {
+            Toast.makeText(this, "User or Reviewer ID is missing!", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        CollectionReference flashcardsRefs = dbs.collection("users")
+                .document(userIds)
+                .collection("reviewer")
+                .document(reviewerId)
+                .collection("flashcards");
+
+        // Query Firestore for the document to delete
+        flashcardsRefs.whereEqualTo("question", flashcard.getQuestion())
+                .whereEqualTo("answer", flashcard.getAnswer())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (!queryDocumentSnapshots.isEmpty()) {
+                        for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                            document.getReference().delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Remove the item from the RecyclerView list
+                                        flashcards.remove(position);
+                                        adapter.notifyItemRemoved(position);
+                                        Toast.makeText(this, "Flashcard deleted", Toast.LENGTH_SHORT).show();
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Toast.makeText(this, "Failed to delete flashcard: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    } else {
+                        Toast.makeText(this, "Flashcard not found in Firestore", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Failed to query Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

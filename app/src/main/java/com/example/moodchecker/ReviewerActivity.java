@@ -444,7 +444,7 @@ public class ReviewerActivity extends AppCompatActivity {
             if (folderNameTextView != null && folderNameTextView.getText().toString().equals(oldName)) {
                 // Change folder icon color to green upon rename
                 ImageView folderIcon = folderItem.findViewById(R.id.folderIcon);
-                folderIcon.setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
+//                folderIcon.setColorFilter(getResources().getColor(R.color.green), PorterDuff.Mode.SRC_IN);
 
                 // Update the name in the UI
                 folderNameTextView.setText(newName);

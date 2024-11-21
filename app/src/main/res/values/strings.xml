@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">MoodChecker</string>
+    <string name="app_name">Studdy</string>
 
     <string-array name="answer_types">
         <item>Multiple Choice</item>

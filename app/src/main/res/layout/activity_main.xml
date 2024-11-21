@@ -76,7 +76,7 @@
         android:layout_width="148dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:layout_marginEnd="32dp"
+        android:layout_marginEnd="16dp"
         android:backgroundTint="#52B0D3"
         android:fontFamily="@font/poppins_bold"
         android:text="Tired"

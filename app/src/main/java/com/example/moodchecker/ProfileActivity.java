@@ -306,14 +306,17 @@ public class ProfileActivity extends AppCompatActivity {
                         }
                         // Set the total streaks in the TextView
                         tvStreak.setText(String.valueOf(totalStreaks));
+                        updateBadge(totalStreaks);
                     } else {
                         // If no streak document exists, set default value (e.g., "0")
                         tvStreak.setText("0");
                         Toast.makeText(ProfileActivity.this, "Streak data not found!", Toast.LENGTH_SHORT).show();
+                        updateBadge(0);
                     }
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(ProfileActivity.this, "Error loading streak data", Toast.LENGTH_SHORT).show();
+                    updateBadge(0);
                 });
 
         db.collection("users")

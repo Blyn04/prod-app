@@ -106,5 +106,4 @@ dependencies {
     annotationProcessor("com.github.bumptech.glide:compiler:4.15.1")
 
     implementation("pl.droidsonroids.gif:android-gif-drawable:1.2.28")
-
 }

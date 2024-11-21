@@ -7,7 +7,10 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
-
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +22,10 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MoodChecker"
         tools:targetApi="31">
+        <activity
+            android:name=".TimerDialogActivity"
+            android:theme="@android:style/Theme.Dialog"
+            android:launchMode="singleTask"/>
         <activity
             android:name=".TimerActivity"
             android:exported="false" />
@@ -81,8 +88,8 @@
 
         <service
             android:name=".TimerService"
-            android:foregroundServiceType="dataSync"
-            android:exported="false" />
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
 
         <receiver
             android:name=".NotificationReceiver"

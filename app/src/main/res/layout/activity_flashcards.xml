@@ -116,7 +116,7 @@
                 android:layout_marginTop="20dp"
                 android:fontFamily="@font/poppins_bold"
                 android:text="Question"
-                android:textColor="#333333"
+                android:textColor="@color/white"
                 android:textSize="15dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -128,7 +128,7 @@
                 android:fontFamily="@font/poppins_bold"
                 android:padding="5dp"
                 android:text="Answer Type"
-                android:textColor="#333333"
+                android:textColor="@color/white"
                 android:textSize="15dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.081"
@@ -178,13 +178,16 @@
                 android:textSize="10dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/viewFlashcardsButton"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="@+id/correctanswerinput1"
-                app:layout_constraintTop_toBottomOf="@+id/correctanswerinput" />
+                app:layout_constraintTop_toBottomOf="@+id/correctanswerinput"
+                app:layout_constraintVertical_bias="0.666" />
 
             <Button
                 android:id="@+id/viewFlashcardsButton"
                 android:layout_width="145dp"
                 android:layout_height="45dp"
+                android:layout_marginEnd="8dp"
                 android:layout_marginBottom="16dp"
                 android:backgroundTint="#80B9A2"
                 android:fontFamily="@font/poppins_bold"
@@ -193,7 +196,8 @@
                 android:textSize="10dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/correctanswerinput"
-                app:layout_constraintTop_toBottomOf="@+id/correctanswerinput" />
+                app:layout_constraintTop_toBottomOf="@+id/correctanswerinput"
+                app:layout_constraintVertical_bias="0.666" />
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/correctanswerinput"
@@ -209,7 +213,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="@+id/answerTypeSpinner"
                 app:layout_constraintTop_toBottomOf="@+id/answerTypeSpinner"
-                app:startIconDrawable="@drawable/status"
                 app:startIconTint="#D8D8D8">
 
                 <com.google.android.material.textfield.TextInputEditText
