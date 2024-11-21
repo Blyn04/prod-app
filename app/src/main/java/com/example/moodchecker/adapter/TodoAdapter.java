@@ -33,13 +33,17 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder> {
     private List<TodoItem> todoList;
     private TaskClickListener listener;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private Set<TodoItem> selectedTasks = new HashSet<>();
 
     public TodoAdapter(List<TodoItem> todoList) {
         this.todoList = todoList;
@@ -81,22 +85,6 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
         }
         holder.statusSpinner.setEnabled(false);
         holder.statusSpinner.setClickable(false);
-        // Handle Spinner item selection change
-//        holder.statusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-//            @Override
-//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-//                String newStatus = parent.getItemAtPosition(position).toString();
-//                item.setStatus(newStatus); // Update the status in the TodoItem
-//                Log.d("TodoAdapter", "Status updated: " + newStatus);
-//            }
-//
-//            @Override
-//            public void onNothingSelected(AdapterView<?> parent) {
-//                // Do nothing
-//            }
-//        });
-
-
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -106,16 +94,137 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
             }
         });
 
+//        holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+//                    Log.d("TodoAdapter", "Checkbox checked: " + isChecked);
+//                    if (isChecked) {
+//                        buttonView.setEnabled(false);
+//                        // Show confirmation dialog to remove the task
+//                        String taskName = item.getName();
+//                        showRemoveConfirmationDialog(holder.itemView.getContext(), taskName, position);
+//                    }
+//                }
+//        );
+
         holder.checkBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-                    Log.d("TodoAdapter", "Checkbox checked: " + isChecked);
-                    if (isChecked) {
-                        buttonView.setEnabled(false);
-                        // Show confirmation dialog to remove the task
-                        String taskName = item.getName();
-                        showRemoveConfirmationDialog(holder.itemView.getContext(), taskName, position);
+            if (isChecked) {
+                selectedTasks.add(item);
+            } else {
+                selectedTasks.remove(item);
+            }
+        });
+    }
+
+//    public void deleteSelectedTasks(Context context, String userId) {
+//        List<TodoItem> tasksToDelete = new ArrayList<>(selectedTasks);
+//        selectedTasks.clear();
+//
+//        for (TodoItem task : tasksToDelete) {
+//            removeTaskFromFirestore(context, userId, task.getName());
+//        }
+//
+//        // Clear the selection after deletion
+//        selectedTasks.clear();
+//        notifyDataSetChanged();
+//    }
+
+    public void removeSelectedTasks(String userId, Context context) {
+        // Create a list of task names from selectedTasks (TodoItem objects)
+        List<String> tasksToDelete = new ArrayList<>();
+        for (TodoItem todoItem : selectedTasks) {
+            tasksToDelete.add(todoItem.getName());  // Assuming TodoItem has a 'getName()' method
+        }
+        selectedTasks.clear();  // Clear selectedTasks after preparing the list of names
+
+        // Show a confirmation dialog before proceeding with deletion
+        new AlertDialog.Builder(context)
+                .setTitle("Confirm Deletion")
+                .setMessage("Are you sure you want to delete the selected tasks?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Proceed with task deletion if the user confirms
+                    for (String taskName : tasksToDelete) {
+                        removeTaskFromFirestore(context, userId, taskName);
                     }
-                }
-        );
+                })
+                .setNegativeButton("No", (dialog, which) -> {
+                    uncheckAllCheckboxes();
+                    dialog.dismiss();
+                })
+                .setCancelable(true)
+                .show();
+    }
+
+//
+//    private void removeTaskFromFirestore(Context context, String userId, String taskName) {
+//        CollectionReference tasksRef = db.collection("users")
+//                .document(userId)
+//                .collection("tasks");
+//
+//        tasksRef.whereEqualTo("name", taskName)
+//                .get()
+//                .addOnCompleteListener(task -> {
+//                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+//                        for (DocumentSnapshot document : task.getResult()) {
+//                            tasksRef.document(document.getId())
+//                                    .delete()
+//                                    .addOnSuccessListener(aVoid -> {
+//                                        Toast.makeText(context, "Task deleted", Toast.LENGTH_SHORT).show();
+//                                    })
+//                                    .addOnFailureListener(e -> {
+//                                        Toast.makeText(context, "Error deleting task", Toast.LENGTH_SHORT).show();
+//                                    });
+//                        }
+//                    } else {
+//                        Toast.makeText(context, "Task not found", Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//    }
+
+    private void removeTaskFromFirestore(Context context, String userId, String taskName) {
+        CollectionReference tasksRef = db.collection("users")
+                .document(userId)
+                .collection("tasks");
+
+        tasksRef.whereEqualTo("name", taskName)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                        for (DocumentSnapshot document : task.getResult()) {
+                            tasksRef.document(document.getId())
+                                    .delete()
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Show success message after deleting from Firestore
+                                        Toast.makeText(context, "Task deleted: " + taskName, Toast.LENGTH_SHORT).show();
+
+                                        // Remove the task from the UI list and update RecyclerView
+                                        removeTaskFromList(taskName);
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Show error message if deletion fails
+                                        Toast.makeText(context, "Error deleting task: " + taskName, Toast.LENGTH_SHORT).show();
+                                    });
+                        }
+                    }
+                });
+    }
+
+    // Updates the todoList by removing the task and notifying the adapter
+    private void removeTaskFromList(String taskName) {
+        for (int i = 0; i < todoList.size(); i++) {
+            if (todoList.get(i).getName().equals(taskName)) {
+                todoList.remove(i);
+                notifyItemRemoved(i); // Notify that this item has been removed
+                break;
+            }
+        }
+        notifyDataSetChanged(); // Ensure the adapter is refreshed after removing items
+    }
+
+    // Method to uncheck all checkboxes in the RecyclerView
+    private void uncheckAllCheckboxes() {
+        for (int i = 0; i < todoList.size(); i++) {
+            todoList.get(i).setChecked(false);  // Assuming TodoItem has a 'setChecked()' method
+            notifyItemChanged(i);  // Notify that this item has been changed (unchecked)
+        }
     }
 
     private void updateTaskStatusInFirestore(String userId, String taskName, String newStatus) {
@@ -220,85 +329,6 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
                 .create()
                 .show();
     }
-
-//    private void showTaskDetailsDialog(TodoItem task, Context context) {
-//        LayoutInflater inflater = LayoutInflater.from(context);
-//        View dialogView = inflater.inflate(R.layout.custom_timer_dialog, null);
-//
-//        EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
-//        Spinner statusSpinner = dialogView.findViewById(R.id.todoStatusSpinner);
-//        TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);
-//        EditText hoursEditText = dialogView.findViewById(R.id.hoursEditText);
-//        EditText minutesEditText = dialogView.findViewById(R.id.minutesEditText);
-//        EditText secondsEditText = dialogView.findViewById(R.id.secondsEditText);
-//        Button startTimerButton = dialogView.findViewById(R.id.startTimerButton);
-//        Button stopTimerButton = dialogView.findViewById(R.id.stopTimerButton);
-//
-//        taskNameEditText.setText(task.getName());
-//
-//        // List of possible statuses
-//        String[] statuses = {"Not Started", "In Progress", "Complete"};
-//
-//        // Find the index of task status in the list
-//        int statusIndex = -1;
-//        for (int i = 0; i < statuses.length; i++) {
-//            if (statuses[i].equals(task.getStatus())) {
-//                statusIndex = i;
-//                break;
-//            }
-//        }
-//
-//        // Debugging log to check the value of task.getStatus() and statusIndex
-//        Log.d("TodoAdapter", "Task status: " + task.getStatus());
-//        Log.d("TodoAdapter", "Status index: " + statusIndex);
-//
-//        // Set the status spinner selection
-//        if (statusIndex != -1) {
-//            statusSpinner.setSelection(statusIndex);
-//        } else {
-//            // Set to default if status is not found
-//            statusSpinner.setSelection(0);
-//        }
-//
-//        deadlineTextView.setText(task.getDeadline());
-//        long timerDuration = task.getTimerDuration();
-//        hoursEditText.setText(String.format("%02d", timerDuration / 3600000));
-//        minutesEditText.setText(String.format("%02d", (timerDuration % 3600000) / 60000));
-//        secondsEditText.setText(String.format("%02d", (timerDuration % 60000) / 1000));
-//
-//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-//        builder.setView(dialogView);
-//
-//        AlertDialog dialog = builder.create();
-//
-//        startTimerButton.setOnClickListener(v -> {
-//            String hours = hoursEditText.getText().toString();
-//            String minutes = minutesEditText.getText().toString();
-//            String seconds = secondsEditText.getText().toString();
-//
-//            long duration = 0;
-//            try {
-//                duration += Long.parseLong(hours) * 3600000;
-//                duration += Long.parseLong(minutes) * 60000;
-//                duration += Long.parseLong(seconds) * 1000;
-//            } catch (NumberFormatException e) {
-//                showErrorDialog(context, "Please enter valid time values.");
-//                return;
-//            }
-//
-//            task.setTimerDuration(duration);
-//            notifyDataSetChanged();
-//
-//            Intent serviceIntent = new Intent(context, TimerService.class);
-//            serviceIntent.putExtra("timerDuration", duration);
-//            ContextCompat.startForegroundService(context, serviceIntent);
-//            dialog.dismiss();
-//        });
-//
-//        stopTimerButton.setOnClickListener(v -> dialog.dismiss());
-//
-//        dialog.show();
-//    }
 
     private void showTaskDetailsDialog(TodoItem task, Context context) {
         LayoutInflater inflater = LayoutInflater.from(context);

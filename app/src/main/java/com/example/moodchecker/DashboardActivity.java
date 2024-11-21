@@ -466,12 +466,17 @@ public class DashboardActivity extends AppCompatActivity {
         });
 
 
+//        removeTaskButton.setOnClickListener(v -> {
+//            if (!todoList.isEmpty()) {
+//                int lastPosition = todoList.size() - 1;
+//                todoList.remove(lastPosition);
+//                todoAdapter.notifyItemRemoved(lastPosition);
+//            }
+//        });
+
         removeTaskButton.setOnClickListener(v -> {
-            if (!todoList.isEmpty()) {
-                int lastPosition = todoList.size() - 1;
-                todoList.remove(lastPosition);
-                todoAdapter.notifyItemRemoved(lastPosition);
-            }
+            String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+            todoAdapter.removeSelectedTasks(userId, this);
         });
 
         db.collection("users")

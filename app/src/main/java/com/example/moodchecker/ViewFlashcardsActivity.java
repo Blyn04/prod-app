@@ -267,12 +267,12 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
                     optionThree.setVisibility(View.GONE);
                 }
 
-                if (options.size() > 3) {
-                    optionFour.setText(options.get(3));
-                    optionFour.setVisibility(View.VISIBLE);
-                } else {
-                    optionFour.setVisibility(View.GONE);
-                }
+//                if (options.size() > 3) {
+//                    optionFour.setText(options.get(3));
+//                    optionFour.setVisibility(View.VISIBLE);
+//                } else {
+//                    optionFour.setVisibility(View.GONE);
+//                }
 
                 findViewById(R.id.shortTextInput).setVisibility(View.GONE);
 
@@ -445,4 +445,42 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         super.onDestroy();
     }
 
+//    @Override
+//    public void onBackPressed() {
+//        // Show a confirmation dialog
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Confirm Exit");
+//        builder.setMessage("You will lose your current streak. Are you sure you want to go back?");
+//
+//        // If the user confirms
+//        builder.setPositiveButton("Yes", (dialog, which) -> {
+//            dialog.dismiss();
+//            super.onBackPressed(); // Proceed with the default back button behavior
+//        });
+//
+//        // If the user cancels
+//        builder.setNegativeButton("No", (dialog, which) -> dialog.dismiss());
+//
+//        AlertDialog dialog = builder.create();
+//        dialog.show();
+//    }
+
+    @Override
+    public void onBackPressed() {
+        // Show a confirmation dialog
+        new AlertDialog.Builder(this)
+                .setTitle("Exit Flashcards")
+                .setMessage("Exiting now will reset your current streak. Are you sure you want to go back?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Reset the current streak count but do not affect the database
+                    streakCount = 0;
+                    updateStreakDisplay();
+                    super.onBackPressed(); // Navigate back
+                })
+                .setNegativeButton("No", (dialog, which) -> {
+                    // Do nothing, dismiss the dialog
+                    dialog.dismiss();
+                })
+                .show();
+    }
 }
