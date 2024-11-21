@@ -1,5 +1,7 @@
 package com.example.moodchecker;
 
+import android.app.Dialog;
+import android.content.Intent;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +19,7 @@ import android.speech.tts.TextToSpeech.OnInitListener;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.example.moodchecker.model.Flashcard;
 import com.google.firebase.auth.FirebaseAuth;
@@ -347,8 +350,16 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_streak, null);
 
         // Create the dialog
-        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
-        builder.setView(dialogView);
+//        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+//        builder.setView(dialogView);
+
+        Dialog dialog = new Dialog(this);
+        dialog.setContentView(dialogView);
+        dialog.setCancelable(true);  // Set it to be cancellable when clicking outside
+
+        // Set custom dialog window dimensions
+        dialog.getWindow().setLayout(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_dialog);
 
         // Customize dialog elements
         TextView streakMessage = dialogView.findViewById(R.id.streakMessage);
@@ -360,11 +371,17 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         streakMessage.setText(message);
 
         // Show the dialog
-        androidx.appcompat.app.AlertDialog dialog = builder.create();
+//        androidx.appcompat.app.AlertDialog dialog = builder.create();
         dialog.show();
 
         // Handle the OK button click
-        okButton.setOnClickListener(v -> dialog.dismiss());
+        okButton.setOnClickListener(v -> {
+            Intent intent = new Intent(ViewFlashcardsActivity.this, FlashcardsActivity.class); // Replace 'CurrentActivity.this' with your actual activity name
+            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK); // Optional: Clears back stack
+            startActivity(intent);
+            finish(); // Optional: Finish the current activity
+        });
+
     }
 
 

@@ -24,6 +24,8 @@ import android.widget.LinearLayout;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+
 import com.example.moodchecker.model.Reviewer;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -74,9 +76,18 @@ public class ReviewerActivity extends AppCompatActivity {
 
     private void showAddReviewerDialog() {
         // Create a new dialog
+//        Dialog dialog = new Dialog(this);
+//        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+//        dialog.setContentView(R.layout.dialog_add_reviewer);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_reviewer, null);
+
         Dialog dialog = new Dialog(this);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(R.layout.dialog_add_reviewer);
+        dialog.setContentView(dialogView);
+        dialog.setCancelable(true);  // Set it to be cancellable when clicking outside
+
+        // Set custom dialog window dimensions
+        dialog.getWindow().setLayout(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_dialog);
 
         // Find dialog views
         EditText reviewerNameEditText = dialog.findViewById(R.id.reviewerNameEditText);
