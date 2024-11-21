@@ -65,9 +65,9 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 holder.itemView.getContext(),
                 R.array.task_status_array, // Array in strings.xml
-                android.R.layout.simple_spinner_item
+                R.layout.spinner_item
         );
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.spinner_item);
         holder.statusSpinner.setAdapter(adapter);
 
         // Set Spinner selection based on status
