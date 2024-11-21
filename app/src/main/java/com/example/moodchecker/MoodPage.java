@@ -1,6 +1,7 @@
 package com.example.moodchecker;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -36,7 +37,7 @@ public class MoodPage extends AppCompatActivity {
         moodStatusTextView.setText(mood.toUpperCase());
         moodMessageTextView.setText(message);
 
-        changeMoodImage(mood);
+        changeMoodImageAndTextColor(mood);
 
         // Set up the continue button click listener to navigate to the Dashboard
         continueButton.setOnClickListener(new View.OnClickListener() {
@@ -50,30 +51,37 @@ public class MoodPage extends AppCompatActivity {
         });
     }
 
-    private void changeMoodImage(String mood) {
+    private void changeMoodImageAndTextColor(String mood) {
         int imageResId = 0;
+        int textColor = Color.BLACK; // Default text color
 
         switch (mood.toLowerCase()) {
             case "happy":
                 imageResId = R.drawable.happy; // happy.png
+                textColor = Color.parseColor("#E8734E");
                 break;
             case "calm":
                 imageResId = R.drawable.calm; // calm.png
+                textColor = Color.parseColor("#52AFD2");
                 break;
             case "sick":
                 imageResId = R.drawable.sick; // sick.png
+                textColor = Color.parseColor("#E2ADBA");
                 break;
             case "tired":
                 imageResId = R.drawable.tired; // tired.png
+                textColor = Color.parseColor("#7ABAA2");
                 break;
             default:
-                // Set a default image if the mood is not recognized
+                // Set a default image and color if the mood is not recognized
                 imageResId = R.drawable.happy; // You can replace with a default image if needed
+                textColor = Color.BLACK;
                 break;
         }
 
         // Set the ImageView's srcCompat to the correct image
         nadzFaceImageView.setImageResource(imageResId);
+        moodStatusTextView.setTextColor(textColor);
     }
 
     // Optionally, you can keep the method for setting up other mood buttons if needed.
