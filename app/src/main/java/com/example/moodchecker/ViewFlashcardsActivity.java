@@ -96,12 +96,6 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
             }
         });
 
-//        ttsButton.setOnClickListener(view -> {
-//            // Trigger TTS to read the current question
-//            Flashcard flashcard = flashcards.get(currentIndex);
-//            String questionText = flashcard.getQuestion();
-//            textToSpeech.speak(questionText, TextToSpeech.QUEUE_FLUSH, null, null);
-//        });
 
         ttsButton.setOnClickListener(view -> {
             if (textToSpeech.isSpeaking()) {
@@ -221,62 +215,20 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         }
     }
 
-//    private void displayFlashcard(int index) {
-//        if (index < flashcards.size()) {
-//            Flashcard flashcard = flashcards.get(index);
-//            questionNumberTextView.setText("QUESTION " + String.format("%02d", index + 1));
-//            questionTextView.setText(flashcard.getQuestion());
-//
-//            List<String> options = flashcard.getOptions();
-//
-//            if (flashcard.getAnswerType().equals("Multiple Choice")) {
-//                optionsGroup.setVisibility(View.VISIBLE);
-//
-//                if (options != null && options.size() > 0) {
-//                    optionOne.setText(options.get(0));
-//                    optionOne.setVisibility(View.VISIBLE);
-//                } else {
-//                    optionOne.setVisibility(View.GONE);
-//                }
-//
-//                if (options.size() > 1) {
-//                    optionTwo.setText(options.get(1));
-//                    optionTwo.setVisibility(View.VISIBLE);
-//                } else {
-//                    optionTwo.setVisibility(View.GONE);
-//                }
-//
-//                if (options.size() > 2) {
-//                    optionThree.setText(options.get(2));
-//                    optionThree.setVisibility(View.VISIBLE);
-//                } else {
-//                    optionThree.setVisibility(View.GONE);
-//                }
-//
-//                if (options.size() > 3) {
-//                    optionFour.setText(options.get(3));
-//                    optionFour.setVisibility(View.VISIBLE);
-//                } else {
-//                    optionFour.setVisibility(View.GONE);
-//                }
-//
-//                findViewById(R.id.shortTextInput).setVisibility(View.GONE);
-//
-//            } else if (flashcard.getAnswerType().equals("Short Text")) {
-//                optionsGroup.setVisibility(View.GONE);
-//
-//                findViewById(R.id.shortTextInput).setVisibility(View.VISIBLE);
-//                EditText shortTextInput = findViewById(R.id.shortTextInput);
-//                shortTextInput.setText("");
-//            }
-//        }
-//    }
-
     private void displayFlashcard(int index) {
         if (index < flashcards.size()) {
             Flashcard flashcard = flashcards.get(index);
             questionNumberTextView.setText("QUESTION " + String.format("%02d", index + 1));
             questionTextView.setText(flashcard.getQuestion());
+
+            String reviewerName = flashcard.getReviewerName(); // Make sure you have this field in Flashcard
+            String description = flashcard.getDescription();
+
+            TextView reviewerNameTextView = findViewById(R.id.textView13);
+            TextView descriptionTextView = findViewById(R.id.textView11);
+
+            reviewerNameTextView.setText(reviewerName); // Set the name
+            descriptionTextView.setText(description);
 
             // Use TTS to read the question
 //            textToSpeech.speak(flashcard.getQuestion(), TextToSpeech.QUEUE_FLUSH, null, null);
@@ -341,79 +293,6 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         return null;
     }
 
-//    private void updateStreakDisplay() {
-//        streakTextView.setText("Streak: " + streakCount);
-//
-//        // Show specific message based on the streak count
-//        String message = "";
-//
-//        switch (streakCount) {
-//            case 10:
-//                message = "You're doing great! Keep up the momentum!";
-//                break;
-//            case 20:
-//                message = "Fantastic progress! Your hard work is paying off!";
-//                break;
-//            case 30:
-//                message = "Impressive! You’re mastering this material!";
-//                break;
-//            case 40:
-//                message = "Amazing focus! You’re well on your way to acing this.";
-//                break;
-//            case 50:
-//                message = "Halfway to 100! Keep that knowledge growing!";
-//                break;
-//            case 60:
-//                message = "Incredible dedication! You're truly committed.";
-//                break;
-//            case 70:
-//                message = "You're unstoppable! Just a few more to hit 100!";
-//                break;
-//            case 80:
-//                message = "Your effort is inspiring! Keep pushing forward.";
-//                break;
-//            case 90:
-//                message = "Almost at 100! You're a reviewing champion!";
-//                break;
-//            case 100:
-//                message = "Congratulations on 100! Your dedication is remarkable!";
-//                break;
-//            default:
-//                message = "";
-//                break;
-//        }
-//
-//        // If a message is available for the streak, show it
-//        if (!message.isEmpty()) {
-//            showStreakPopup(streakCount, message);
-//        }
-//    }
-//
-//    private void showStreakPopup(int streak, String message) {
-//        // Inflate the custom layout
-//        View dialogView = getLayoutInflater().inflate(R.layout.dialog_streak, null);
-//
-//        // Create the dialog
-//        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
-//        builder.setView(dialogView);
-//
-//        // Customize dialog elements
-//        TextView streakMessage = dialogView.findViewById(R.id.streakMessage);
-//        TextView streakCountMessage = dialogView.findViewById(R.id.streakCountMessage);
-//        Button okButton = dialogView.findViewById(R.id.okButton);
-//
-//        // Update the dialog message based on streak count
-//        streakCountMessage.setText( streak + " Streak!!");
-//        streakMessage.setText(message);
-//
-//        // Show the dialog
-//        androidx.appcompat.app.AlertDialog dialog = builder.create();
-//        dialog.show();
-//
-//        // Handle the OK button click
-//        okButton.setOnClickListener(v -> dialog.dismiss());
-//    }
-
     private void updateStreakDisplay() {
         streakTextView.setText("Streak: " + streakCount);
 
@@ -422,7 +301,13 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
         AppCompatImageView streakIcon = findViewById(R.id.streakIcon);
 
         // Default icon for all streaks except 30, 50, 70, and 100
-        streakIcon.setImageResource(R.drawable.streakfire);  // Set default icon
+//        streakIcon.setImageResource(R.drawable.streakfire);  // Set default icon
+
+        if (streakIcon != null) {
+            streakIcon.setImageResource(R.drawable.streakfire);
+        } else {
+            Log.e("ImageViewError", "ImageView is null. Check the ID or layout inflation.");
+        }
 
         // Check the streak count and update accordingly
         if (streakCount == 10) {
@@ -505,20 +390,6 @@ public class ViewFlashcardsActivity extends AppCompatActivity implements TextToS
     private void loadStreakFromFirebase() {
         String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-//        db.collection("users")
-//                .document(userId)
-//                .get()
-//                .addOnSuccessListener(documentSnapshot -> {
-//                    if (documentSnapshot.exists()) {
-//                        Integer savedStreak = documentSnapshot.getLong("streak").intValue();
-//                        streakCount = savedStreak; // Set the streak from Firebase
-//                        updateStreakDisplay(); // Update UI
-//                    }
-//                })
-//                .addOnFailureListener(e -> {
-//                    // Handle failure to retrieve streak
-//                    Log.w("Firestore", "Error getting streak", e);
-//                });
 
         db.collection("users")
                 .document(userId)

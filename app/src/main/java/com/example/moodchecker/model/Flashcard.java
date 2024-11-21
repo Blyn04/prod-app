@@ -12,6 +12,8 @@ public class Flashcard implements Serializable {
     private String correctAnswer;
     private boolean isAnswered = false;
     private boolean isCorrect = false;
+    private String reviewerName; // Add this field
+    private String description;
 
     public Flashcard() {}
 
@@ -84,5 +86,17 @@ public class Flashcard implements Serializable {
 
     public void setCorrect(boolean correct) {
         isCorrect = correct;
+    }
+    public String getReviewerName() {
+        return reviewerName;
+    }
+    public void setReviewerName(String reviewerName) {
+        this.reviewerName = reviewerName;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

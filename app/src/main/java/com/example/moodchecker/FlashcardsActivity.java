@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -392,6 +393,37 @@ public class FlashcardsActivity extends AppCompatActivity {
                         Toast.makeText(this, "Failed to query Firestore: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
         });
+
+        // Assuming reviewerId is already passed from the previous activity
+//        String reviewerId = getIntent().getStringExtra("reviewerId");
+
+// Firestore reference to fetch the reviewer's name and description
+        db = FirebaseFirestore.getInstance();
+        DocumentReference reviewerRef = db.collection("users")
+                .document(FirebaseAuth.getInstance().getCurrentUser().getUid()) // Get current user
+                .collection("reviewer")
+                .document(reviewerId);
+
+        reviewerRef.get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists()) {
+                        String reviewerName = documentSnapshot.getString("name");
+                        String reviewerDescription = documentSnapshot.getString("description");
+
+                        // Set the data to the TextViews
+                        TextView nameTextView = findViewById(R.id.textView13); // For name
+                        TextView descriptionTextView = findViewById(R.id.textView11); // For description
+                        nameTextView.setText(reviewerName);
+                        descriptionTextView.setText(reviewerDescription);
+                    } else {
+                        Log.e("FlashcardsActivity", "No such reviewer document");
+                        Toast.makeText(FlashcardsActivity.this, "Reviewer data not found", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("FlashcardsActivity", "Error fetching reviewer data", e);
+                    Toast.makeText(FlashcardsActivity.this, "Failed to load reviewer data", Toast.LENGTH_SHORT).show();
+                });
     }
 
     private void loadFlashcards(CollectionReference flashcardsRef) {
