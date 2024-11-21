@@ -77,6 +77,14 @@ public class SignUpActivity extends AppCompatActivity {
             }
         });
 
+        loginPrompt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(SignUpActivity.this, LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+
         // Create notification channel if Android version is Oreo or above
         createNotificationChannel();
     }
