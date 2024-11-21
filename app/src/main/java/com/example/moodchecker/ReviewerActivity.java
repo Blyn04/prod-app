@@ -22,6 +22,7 @@ import android.widget.RadioGroup;
 import android.widget.RadioButton;
 import android.widget.LinearLayout;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.moodchecker.model.Reviewer;
 
@@ -92,6 +93,8 @@ public class ReviewerActivity extends AppCompatActivity {
 
                 if (name.isEmpty() || description.isEmpty()) {
                     Toast.makeText(ReviewerActivity.this, "Please enter all details", Toast.LENGTH_SHORT).show();
+                } else if (name.length() < 4 || name.length() > 20) {
+                    Toast.makeText(ReviewerActivity.this, "Reviewer name must be between 4 and 20 characters", Toast.LENGTH_SHORT).show();
                 } else {
                     // Check if the reviewer name is unique
                     if (reviewerNames.contains(name)) {
@@ -186,7 +189,7 @@ public class ReviewerActivity extends AppCompatActivity {
                 } else if (id == R.id.delete_option) {
                     // Handle delete logic here
                     deleteReviewerFolder(reviewerName);
-                    deleteReviewerFolderFromUI(reviewerName);
+//                    deleteReviewerFolderFromUI(reviewerName);
                     return true;
                 } else if (id == R.id.change_color_option) {
                     // Show a dialog with color options
@@ -440,36 +443,112 @@ public class ReviewerActivity extends AppCompatActivity {
     }
 
     // Delete reviewer folder
-    private void deleteReviewerFolder(String reviewerName) {
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null) {
-            String userId = currentUser.getUid();
-            CollectionReference reviewersRef = db.collection("users")
-                    .document(userId)
-                    .collection("reviewer");
+//    private void deleteReviewerFolder(String reviewerName) {
+//        FirebaseUser currentUser = mAuth.getCurrentUser();
+//        if (currentUser != null) {
+//            String userId = currentUser.getUid();
+//            CollectionReference reviewersRef = db.collection("users")
+//                    .document(userId)
+//                    .collection("reviewer");
+//
+//            // Delete the reviewer from Firestore
+//            reviewersRef.whereEqualTo("name", reviewerName)
+//                    .get()
+//                    .addOnCompleteListener(task -> {
+//                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+//                            for (DocumentSnapshot document : task.getResult()) {
+//                                // Delete the reviewer document
+//                                reviewersRef.document(document.getId())
+//                                        .delete()
+//                                        .addOnSuccessListener(aVoid -> {
+//                                            // Successfully deleted the reviewer
+//                                            Toast.makeText(ReviewerActivity.this, "Reviewer deleted", Toast.LENGTH_SHORT).show();
+//                                        })
+//                                        .addOnFailureListener(e -> {
+//                                            // Failed to delete the reviewer
+//                                            Toast.makeText(ReviewerActivity.this, "Error deleting reviewer", Toast.LENGTH_SHORT).show();
+//                                        });
+//                            }
+//                        }
+//                    });
+//        }
+//    }
+//    private void deleteReviewerFolder(String reviewerName) {
+//        // Show a confirmation dialog first
+//        new AlertDialog.Builder(ReviewerActivity.this)
+//                .setTitle("Confirm Deletion")
+//                .setMessage("Are you sure you want to delete this reviewer?")
+//                .setPositiveButton("Yes", (dialog, which) -> {
+//                    // If the user confirms, proceed with deletion
+//                    FirebaseUser currentUser = mAuth.getCurrentUser();
+//                    if (currentUser != null) {
+//                        String userId = currentUser.getUid();
+//                        CollectionReference reviewersRef = db.collection("users")
+//                                .document(userId)
+//                                .collection("reviewer");
+//
+//                        // Delete the reviewer from Firestore
+//                        reviewersRef.whereEqualTo("name", reviewerName)
+//                                .get()
+//                                .addOnCompleteListener(task -> {
+//                                    if (task.isSuccessful() && !task.getResult().isEmpty()) {
+//                                        for (DocumentSnapshot document : task.getResult()) {
+//                                            // Delete the reviewer document
+//                                            reviewersRef.document(document.getId())
+//                                                    .delete()
+//                                                    .addOnSuccessListener(aVoid -> {
+//                                                        // Successfully deleted the reviewer
+//                                                        Toast.makeText(ReviewerActivity.this, "Reviewer deleted", Toast.LENGTH_SHORT).show();
+//                                                    })
+//                                                    .addOnFailureListener(e -> {
+//                                                        // Failed to delete the reviewer
+//                                                        Toast.makeText(ReviewerActivity.this, "Error deleting reviewer", Toast.LENGTH_SHORT).show();
+//                                                    });
+//                                        }
+//                                    }
+//                                });
+//                    }
+//                })
+//                .setNegativeButton("No", (dialog, which) -> {
+//                    // If the user cancels, just dismiss the dialog
+//                    dialog.dismiss();
+//                })
+//                .setCancelable(false)  // Optional: to prevent dismissing the dialog by tapping outside
+//                .show();  // Show the confirmation dialog
+//    }
 
-            // Delete the reviewer from Firestore
-            reviewersRef.whereEqualTo("name", reviewerName)
-                    .get()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
-                            for (DocumentSnapshot document : task.getResult()) {
-                                // Delete the reviewer document
-                                reviewersRef.document(document.getId())
-                                        .delete()
-                                        .addOnSuccessListener(aVoid -> {
-                                            // Successfully deleted the reviewer
-                                            Toast.makeText(ReviewerActivity.this, "Reviewer deleted", Toast.LENGTH_SHORT).show();
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            // Failed to delete the reviewer
-                                            Toast.makeText(ReviewerActivity.this, "Error deleting reviewer", Toast.LENGTH_SHORT).show();
-                                        });
-                            }
-                        }
-                    });
-        }
+    private void deleteReviewerFolder(String reviewerName) {
+        // Create a confirmation dialog
+        new AlertDialog.Builder(ReviewerActivity.this)
+                .setTitle("Confirm Deletion")
+                .setMessage("Are you sure you want to delete this reviewer folder?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // If Yes, delete the reviewer from Firestore
+                    deleteReviewerFromFirestore(reviewerName);
+                    // Also delete from the UI
+                    deleteReviewerFolderFromUI(reviewerName);
+                })
+                .setNegativeButton("No", (dialog, which) -> {
+                    // If No, just dismiss the dialog
+                    dialog.dismiss();
+                })
+                .show();
     }
+
+//    private void deleteReviewerFolderFromUI(String reviewerName) {
+//        GridLayout folderGrid = findViewById(R.id.folderGrid);
+//        int childCount = folderGrid.getChildCount();
+//
+//        for (int i = 0; i < childCount; i++) {
+//            View folderItem = folderGrid.getChildAt(i);
+//            TextView folderNameTextView = folderItem.findViewById(R.id.folderNameTextView);
+//
+//            if (folderNameTextView != null && folderNameTextView.getText().toString().equals(reviewerName)) {
+//                folderGrid.removeViewAt(i); // Remove the folder from the GridLayout
+//                break;
+//            }
+//        }
+//    }
 
     private void deleteReviewerFolderFromUI(String reviewerName) {
         GridLayout folderGrid = findViewById(R.id.folderGrid);
@@ -480,11 +559,42 @@ public class ReviewerActivity extends AppCompatActivity {
             TextView folderNameTextView = folderItem.findViewById(R.id.folderNameTextView);
 
             if (folderNameTextView != null && folderNameTextView.getText().toString().equals(reviewerName)) {
-                folderGrid.removeViewAt(i); // Remove the folder from the GridLayout
+                folderGrid.removeViewAt(i); // Remove the folder item from GridLayout
                 break;
             }
         }
     }
+
+    private void deleteReviewerFromFirestore(String reviewerName) {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser != null) {
+            String userId = currentUser.getUid();
+            CollectionReference reviewersRef = db.collection("users")
+                    .document(userId)
+                    .collection("reviewer");
+
+            // Find the reviewer by name and delete it
+            reviewersRef.whereEqualTo("name", reviewerName)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            for (DocumentSnapshot document : task.getResult()) {
+                                // Delete the reviewer from Firestore
+                                reviewersRef.document(document.getId())
+                                        .delete()
+                                        .addOnSuccessListener(aVoid -> {
+                                            Toast.makeText(ReviewerActivity.this, "Reviewer deleted", Toast.LENGTH_SHORT).show();
+                                        })
+                                        .addOnFailureListener(e -> {
+                                            Toast.makeText(ReviewerActivity.this, "Failed to delete reviewer", Toast.LENGTH_SHORT).show();
+                                        });
+                            }
+                        }
+                    });
+        }
+    }
+
+
     private void fetchReviewersFromFirestore() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {

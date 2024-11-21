@@ -66,6 +66,8 @@ public class SignUpActivity extends AppCompatActivity {
                     Toast.makeText(SignUpActivity.this, "Please fill all fields", Toast.LENGTH_SHORT).show();
                 } else if (!password.equals(confirmPassword)) {
                     Toast.makeText(SignUpActivity.this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+                } else if (username.length() < 4 || username.length() > 8) {
+                    Toast.makeText(SignUpActivity.this, "Username must be between 4 and 8 characters", Toast.LENGTH_SHORT).show();
                 } else {
                     // Create user with Firebase Authentication
                    // signUpWithFirebase(username, email, password);

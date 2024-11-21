@@ -245,6 +245,15 @@ public class DashboardActivity extends AppCompatActivity {
                                 return;  // Don't proceed to save the task
                             }
 
+                            if (taskName.length() < 4 || taskName.length() > 15) {
+                                new AlertDialog.Builder(DashboardActivity.this)
+                                        .setTitle("Error")
+                                        .setMessage("Task name must be between 4 and 15 characters.")
+                                        .setPositiveButton("OK", null)
+                                        .show();
+                                return;  // Don't proceed to save the task
+                            }
+
                             String status = statusSpinner.getSelectedItem().toString();
                             String deadline = deadlineTextView.getText().toString();
 

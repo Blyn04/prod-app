@@ -26,6 +26,7 @@
         private String userId;
         private String reviewerId;
 
+
         public FlashcardAdapter(List<Flashcard> flashcards) {
             this.flashcards = flashcards;
         }
@@ -58,7 +59,7 @@
                 if (options.size() > 0) holder.optionOne.setText(options.get(0));
                 if (options.size() > 1) holder.optionTwo.setText(options.get(1));
                 if (options.size() > 2) holder.optionThree.setText(options.get(2));
-                if (options.size() > 3) holder.optionFour.setText(options.get(3));
+//                if (options.size() > 3) holder.optionFour.setText(options.get(3));
 
                 // Set up a listener to determine the selected option
                 holder.optionOne.setOnClickListener(view -> {
@@ -76,10 +77,10 @@
                     Toast.makeText(view.getContext(), "Correct answer: " + flashcard.getCorrectAnswer(), Toast.LENGTH_SHORT).show();
                 });
 
-                holder.optionFour.setOnClickListener(view -> {
-                    flashcard.setCorrectAnswer(holder.optionFour.getText().toString());
-                    Toast.makeText(view.getContext(), "Correct answer: " + flashcard.getCorrectAnswer(), Toast.LENGTH_SHORT).show();
-                });
+//                holder.optionFour.setOnClickListener(view -> {
+//                    flashcard.setCorrectAnswer(holder.optionFour.getText().toString());
+//                    Toast.makeText(view.getContext(), "Correct answer: " + flashcard.getCorrectAnswer(), Toast.LENGTH_SHORT).show();
+//                });
 
             } else {
                 holder.optionsContainer.setVisibility(View.GONE);
@@ -129,7 +130,7 @@
                 optionOne = itemView.findViewById(R.id.optionOne);
                 optionTwo = itemView.findViewById(R.id.optionTwo);
                 optionThree = itemView.findViewById(R.id.optionThree);
-                optionFour = itemView.findViewById(R.id.optionFour);
+//                optionFour = itemView.findViewById(R.id.optionFour);
             }
         }
     }
