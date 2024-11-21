@@ -12,18 +12,18 @@
 
     <!-- Back Button -->
 
-    <ImageView
-        android:id="@+id/imageView23"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:contentDescription="Logo"
-        android:src="@drawable/ic_back"
-        app:layout_constraintBottom_toBottomOf="@+id/textView10"
-        app:layout_constraintEnd_toStartOf="@+id/textView10"
-        app:layout_constraintHorizontal_bias="0.444"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0" />
+<!--    <ImageView-->
+<!--        android:id="@+id/imageView23"-->
+<!--        android:layout_width="48dp"-->
+<!--        android:layout_height="48dp"-->
+<!--        android:contentDescription="Logo"-->
+<!--        android:src="@drawable/ic_back"-->
+<!--        app:layout_constraintBottom_toBottomOf="@+id/textView10"-->
+<!--        app:layout_constraintEnd_toStartOf="@+id/textView10"-->
+<!--        app:layout_constraintHorizontal_bias="0.444"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent"-->
+<!--        app:layout_constraintVertical_bias="1.0" />-->
 
     <TextView
         android:id="@+id/textView10"
@@ -36,6 +36,7 @@
         android:onClick="navigateBack"
         android:padding="8dp"
         android:text="Back"
+        android:drawableLeft="@drawable/ic_back"
         android:textColor="#000000"
         android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="@+id/imageView8"
@@ -103,7 +104,7 @@
         app:strokeWidth="0.8dp" />
 
     <Button
-        android:id="@+id/button7"
+        android:id="@+id/sleepButton"
         android:layout_width="147dp"
         android:layout_height="60dp"
         android:layout_marginTop="20dp"
@@ -131,7 +132,7 @@
         android:textSize="15dp"
         app:cornerRadius="10dp"
         app:icon="@drawable/calmi"
-        app:layout_constraintEnd_toStartOf="@+id/button7"
+        app:layout_constraintEnd_toStartOf="@+id/sleepButton"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="@+id/focusButton"
         app:layout_constraintTop_toBottomOf="@+id/focusButton"
@@ -167,7 +168,7 @@
         android:text="Toggle Sounds"
         android:textColor="#333333"
         android:textSize="18dp"
-        app:layout_constraintEnd_toEndOf="@+id/button7"
+        app:layout_constraintEnd_toEndOf="@+id/sleepButton"
         app:layout_constraintHorizontal_bias="0.486"
         app:layout_constraintStart_toStartOf="@+id/calmButton"
         app:layout_constraintTop_toBottomOf="@+id/calmButton" />
@@ -225,7 +226,7 @@
         android:id="@+id/textView19"
         android:layout_width="110dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/poppins_italic"
         android:text="Relax with soothing rain sounds."
         android:textAlignment="center"
@@ -265,7 +266,7 @@
         android:id="@+id/textView21"
         android:layout_width="110dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="8dp"
         android:fontFamily="@font/poppins_italic"
         android:text="Enjoy the cozy hum of a coffee shop."
         android:textAlignment="center"
@@ -285,6 +286,16 @@
         app:layout_constraintHorizontal_bias="0.578"
         app:layout_constraintStart_toStartOf="@+id/imageView10"
         app:layout_constraintTop_toBottomOf="@+id/imageView10" />
+
+    <SeekBar
+        android:id="@+id/volumeSeekBar"
+        android:layout_width="250dp"
+        android:layout_height="wrap_content"
+        android:max="100"
+        android:progress="100"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView21" />
 
     <ImageView
         android:id="@+id/imageView12"
@@ -314,11 +325,11 @@
         android:id="@+id/imageView14"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/button7"
-        app:layout_constraintEnd_toEndOf="@+id/button7"
+        app:layout_constraintBottom_toBottomOf="@+id/sleepButton"
+        app:layout_constraintEnd_toEndOf="@+id/sleepButton"
         app:layout_constraintHorizontal_bias="0.139"
-        app:layout_constraintStart_toStartOf="@+id/button7"
-        app:layout_constraintTop_toTopOf="@+id/button7"
+        app:layout_constraintStart_toStartOf="@+id/sleepButton"
+        app:layout_constraintTop_toTopOf="@+id/sleepButton"
         app:layout_constraintVertical_bias="0.541"
         app:srcCompat="@drawable/sleepi" />
 
@@ -338,14 +349,14 @@
         android:id="@+id/stopButton"
         android:layout_width="144dp"
         android:layout_height="38dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="20dp"
         android:backgroundTint="#F4F2EF"
         android:fontFamily="@font/poppins_bold"
         android:text="Stop Music"
         android:textColor="#333333"
         android:textSize="12dp"
         app:layout_constraintEnd_toStartOf="@+id/startReviewingButton"
-        app:layout_constraintHorizontal_bias="0.561"
+        app:layout_constraintHorizontal_bias="0.853"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView19" />
 
@@ -353,7 +364,7 @@
         android:id="@+id/startReviewingButton"
         android:layout_width="105dp"
         android:layout_height="40dp"
-        android:layout_marginTop="12dp"
+        android:layout_marginTop="20dp"
         android:backgroundTint="#F4F2EF"
         android:fontFamily="@font/poppins_bold"
         android:text="Start Reviewing"

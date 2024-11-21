@@ -36,7 +36,7 @@ public class SignUpActivity extends AppCompatActivity {
 
         // Initialize Firebase Auth
         FirebaseApp.initializeApp(this);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
 
         // Initialize UI elements

@@ -111,6 +111,7 @@ public class TimerService extends Service {
                         updateNotification(formatTime(timerDuration));
                         handler.postDelayed(this, 1000); // Repeat every second
                     } else {
+                        Log.d("TimerService", "Timer finished. Triggering alarm.");
                         triggerAlarm();
                         stopSelf(); // Stop the service when the timer ends
                     }
@@ -158,10 +159,11 @@ public class TimerService extends Service {
 //    }
 
     private void triggerAlarm() {
-        // Set the audio stream to alarm to override silent mode
+        Log.d("TimerService", "Triggering alarm...");
+
+        // Trigger alarm sound only once when the timer ends
         AudioManager audioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
         if (audioManager != null) {
-            // Set the alarm stream volume to the maximum
             audioManager.setStreamVolume(
                     AudioManager.STREAM_ALARM,
                     audioManager.getStreamMaxVolume(AudioManager.STREAM_ALARM),
@@ -169,24 +171,23 @@ public class TimerService extends Service {
             );
         }
 
-        // Initialize MediaPlayer and play alarm sound
         try {
+            // Check if the MediaPlayer is properly initialized
             if (mediaPlayer == null) {
                 Log.d("TimerService", "Creating MediaPlayer for alarm sound...");
-                mediaPlayer = MediaPlayer.create(this, R.raw.alarm);  // This assumes the file is at res/raw/alarm.mp3
+                mediaPlayer = MediaPlayer.create(this, R.raw.alarm);  // Make sure you have the correct path here
             }
 
             if (mediaPlayer != null) {
+                Log.d("TimerService", "MediaPlayer is initialized, starting alarm.");
                 mediaPlayer.setOnCompletionListener(mp -> {
-                    Log.d("TimerService", "Alarm finished playing");
+                    Log.d("TimerService", "Alarm finished playing.");
                     mp.reset();
                     mp.release();
-                    stopSelf();
                 });
                 mediaPlayer.start();  // Play the alarm
-                Log.d("TimerService", "Alarm sound started.");
             } else {
-                Log.e("TimerService", "MediaPlayer creation failed. Cannot find the alarm sound.");
+                Log.e("TimerService", "MediaPlayer is null. Cannot play alarm sound.");
             }
         } catch (Exception e) {
             Log.e("TimerService", "Error occurred while playing alarm sound: " + e.getMessage());
@@ -200,8 +201,7 @@ public class TimerService extends Service {
         }
 
         stopForeground(true); // Remove the foreground service notification
-        handler.postDelayed(this::stopSelf, 2000); // Stop service after 2 seconds
-        stopSelf(); // Stop the service immediately
+        stopSelf(); // Stop the service immediately after the alarm plays
     }
 
 
@@ -254,47 +254,45 @@ public class TimerService extends Service {
         }
     }
 
-    private Notification createNotification(String title, String text) {
-        Intent openActivityIntent = new Intent(this, TimerActivity.class);  // Open the TimerActivity on notification click
-        PendingIntent openActivityPendingIntent = PendingIntent.getActivity(this, 0, openActivityIntent, PendingIntent.FLAG_IMMUTABLE);
-
-        return new NotificationCompat.Builder(this, CHANNEL_ID)
-                .setContentTitle(title)
-                .setContentText(text)
-                .setSmallIcon(R.drawable.ic_timer) // Use your own icon here
-//                .addAction(createPauseAction()) // Add a pause button
-                .setOngoing(true) // Make notification non-dismissible
-                .setContentIntent(openActivityPendingIntent) // Set the intent to open the TimerActivity
-                .build();
-    }
-
 //    private Notification createNotification(String title, String text) {
-//        Intent openActivityIntent = new Intent(this, TimerActivity.class);
+//        Intent openActivityIntent = new Intent(this, TimerActivity.class);  // Open the TimerActivity on notification click
 //        PendingIntent openActivityPendingIntent = PendingIntent.getActivity(this, 0, openActivityIntent, PendingIntent.FLAG_IMMUTABLE);
 //
-//        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+//        return new NotificationCompat.Builder(this, CHANNEL_ID)
 //                .setContentTitle(title)
 //                .setContentText(text)
-//                .setSmallIcon(R.drawable.ic_timer)
-//                .setContentIntent(openActivityPendingIntent)
-//                .setOngoing(!"Time's Up!".equals(title)); // Make it dismissible only for "Time's Up!"
-//
-//        // Ensure no sound for the timer countdown, only the "Time's Up!" notification should have sound
-//        if ("Time's Up!".equals(title)) {
-//            builder.setSound(Settings.System.DEFAULT_RINGTONE_URI);  // Set the sound only for the final notification
-//        } else {
-//            builder.setSound(null);  // No sound for the countdown
-//        }
-//
-//        if (!"Time's Up!".equals(title)) {
-//            builder.addAction(createPauseAction());
-//        }
-//
-//        return builder.build();
+//                .setSmallIcon(R.drawable.ic_timer) // Use your own icon here
+//                .addAction(createPauseAction()) // Add a pause button
+//                .setOngoing(true) // Make notification non-dismissible
+//                .setContentIntent(openActivityPendingIntent) // Set the intent to open the TimerActivity
+//                .build();
 //    }
 
+    private Notification createNotification(String title, String text) {
+        Intent openActivityIntent = new Intent(this, TimerActivity.class);
+        PendingIntent openActivityPendingIntent = PendingIntent.getActivity(this, 0, openActivityIntent, PendingIntent.FLAG_IMMUTABLE);
 
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon(R.drawable.ic_timer)
+                .setContentIntent(openActivityPendingIntent)
+                .setOngoing(!"Time's Up!".equals(title)); // Make it dismissible only for "Time's Up!"
 
+        // Ensure no sound for the timer countdown, only the "Time's Up!" notification should have sound
+        if ("Time's Up!".equals(title)) {
+            builder.setSound(Settings.System.DEFAULT_RINGTONE_URI); // Set the sound only for the final notification
+
+        } else {
+            builder.setSound(null);  // No sound for the countdown
+        }
+
+        if (!"Time's Up!".equals(title)) {
+            builder.addAction(createPauseAction());
+        }
+
+        return builder.build();
+    }
 
     private NotificationCompat.Action createPauseAction() {
 //        Intent pauseIntent = new Intent(this, TimerService.class);
