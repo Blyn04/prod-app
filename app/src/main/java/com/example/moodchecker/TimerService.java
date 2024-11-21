@@ -74,8 +74,38 @@ public class TimerService extends Service {
             return START_NOT_STICKY;
         }
 
+        if ("STOP_TIMER".equals(intent.getAction())) {
+            stopTimer();
+            stopForeground(true); // Remove the notification
+            stopSelf(); // Stop the service
+            return START_NOT_STICKY;
+        }
+
+        if (timerDuration == 0) {
+            timerDuration = intent.getLongExtra("timerDuration", 0);
+        }
+        startForegroundService();
+
+        if (!isPaused) {
+            startTimer();
+        }
+
         return START_NOT_STICKY;
     }
+
+    private void stopTimer() {
+        if (handler != null) {
+            handler.removeCallbacks(timerRunnable);
+        }
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
+        isPaused = false; // Reset paused state
+        timerRunnable = null; // Clear the timer
+    }
+
 
     private void startForegroundService() {
         createNotificationChannel();
@@ -289,10 +319,25 @@ public class TimerService extends Service {
 
         if (!"Time's Up!".equals(title)) {
             builder.addAction(createPauseAction());
+            builder.addAction(createStopAction());
         }
 
         return builder.build();
     }
+
+    private NotificationCompat.Action createStopAction() {
+        Intent stopIntent = new Intent(this, TimerService.class);
+        stopIntent.setAction("STOP_TIMER");
+
+        PendingIntent stopPendingIntent = PendingIntent.getService(this, 0, stopIntent, PendingIntent.FLAG_IMMUTABLE);
+
+        return new NotificationCompat.Action.Builder(
+                R.drawable.ic_stop, // Use your own stop icon
+                "Stop",
+                stopPendingIntent
+        ).build();
+    }
+
 
     private NotificationCompat.Action createPauseAction() {
 //        Intent pauseIntent = new Intent(this, TimerService.class);

@@ -144,17 +144,20 @@
             <Button
                 android:id="@+id/saveButton"
                 android:layout_width="wrap_content"
-                android:layout_height="50dp"
+                android:layout_height="40dp"
                 android:layout_marginStart="16dp"
-                android:layout_marginEnd="16dp"
-                android:backgroundTint="#4CAF50"
+                android:layout_marginEnd="20dp"
+                android:backgroundTint="#EDB856"
+                android:fontFamily="@font/poppins_bold"
                 android:text="Save"
                 android:textColor="#FFFFFF"
-                android:textSize="16dp"
+                android:textSize="11dp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.875"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/startTimerButton" />
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+                app:layout_constraintVertical_bias="0.242" />
 
             <Button
                 android:id="@+id/startTimerButton"
@@ -168,7 +171,7 @@
                 android:textColor="#FFFFFF"
                 android:textSize="11dp"
                 app:layout_constraintEnd_toStartOf="@+id/stopTimerButton"
-                app:layout_constraintHorizontal_bias="0.75"
+                app:layout_constraintHorizontal_bias="0.212"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
@@ -388,7 +391,8 @@
                 android:textColor="#FFFFFF"
                 android:textSize="11dp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+                android:visibility="gone"/>
 
             <!--            <TextView-->
             <!--                android:id="@+id/timer"-->
