@@ -15,31 +15,36 @@
             android:id="@+id/yellowColor"
             android:text="Yellow"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"/>
 
         <RadioButton
             android:id="@+id/orangeColor"
             android:text="Orange"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"/>
 
         <RadioButton
             android:id="@+id/pinkColor"
             android:text="Pink"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"/>
 
         <RadioButton
             android:id="@+id/blueColor"
             android:text="Blue"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"/>
 
         <RadioButton
             android:id="@+id/greenColor"
             android:text="Green"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/poppins_medium"/>
     </RadioGroup>
 
     <Button
