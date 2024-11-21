@@ -1,5 +1,6 @@
 package com.example.moodchecker.adapter;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.text.InputType;
@@ -19,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -77,21 +79,24 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
         } else {
             holder.statusSpinner.setSelection(0); // Default to the first item if status is invalid
         }
-
+        holder.statusSpinner.setEnabled(false);
+        holder.statusSpinner.setClickable(false);
         // Handle Spinner item selection change
-        holder.statusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String newStatus = parent.getItemAtPosition(position).toString();
-                item.setStatus(newStatus); // Update the status in the TodoItem
-                Log.d("TodoAdapter", "Status updated: " + newStatus);
-            }
+//        holder.statusSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+//            @Override
+//            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+//                String newStatus = parent.getItemAtPosition(position).toString();
+//                item.setStatus(newStatus); // Update the status in the TodoItem
+//                Log.d("TodoAdapter", "Status updated: " + newStatus);
+//            }
+//
+//            @Override
+//            public void onNothingSelected(AdapterView<?> parent) {
+//                // Do nothing
+//            }
+//        });
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-                // Do nothing
-            }
-        });
+
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
@@ -344,10 +349,18 @@ public class TodoAdapter extends RecyclerView.Adapter<TodoAdapter.TodoViewHolder
         minutesEditText.setText(String.format("%02d", (timerDuration % 3600000) / 60000));
         secondsEditText.setText(String.format("%02d", (timerDuration % 60000) / 1000));
 
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setView(dialogView);
+//        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+//        builder.setView(dialogView);
+//
+//        AlertDialog dialog = builder.create();
 
-        AlertDialog dialog = builder.create();
+        Dialog dialog = new Dialog(context);
+        dialog.setContentView(dialogView);
+        dialog.setCancelable(true);  // Allow dismissal on touch outside
+
+        // Set custom dialog window dimensions
+        dialog.getWindow().setLayout(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+        dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_dialog);
 
         // Save button click listener
         saveButton.setOnClickListener(v -> {

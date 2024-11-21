@@ -2,6 +2,7 @@ package com.example.moodchecker;
 
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
+import android.app.Dialog;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.os.Build;
@@ -19,6 +20,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -66,6 +68,7 @@ public class DashboardActivity extends AppCompatActivity {
         addTaskButton = findViewById(R.id.addTaskButton);
         removeTaskButton = findViewById(R.id.removeTaskButton);
         TextView dashboardTitle = findViewById(R.id.dashboardTitle);
+
 
         // Define lists of messages for each mood
         List<String> tiredMessages = Arrays.asList(
@@ -206,130 +209,262 @@ public class DashboardActivity extends AppCompatActivity {
             }
         });
 
-        addTaskButton.setOnClickListener(v -> {
-                // Inflate the custom layout
-                View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_task, null);
-
-                // Initialize the dialog fields
-                EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
-                Spinner statusSpinner = dialogView.findViewById(R.id.statusSpinner);
-                TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);  // Updated to TextView for date picker
-
-                // Set up the spinner with status options
-                ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this,
-                        android.R.layout.simple_spinner_item, new String[]{"Not Started", "In Progress", "Complete"});
-                statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                statusSpinner.setAdapter(statusAdapter);
-
-                // Set up the AlertDialog
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setView(dialogView)
-                        .setTitle("Add Task")
-                        .setPositiveButton("Save", (dialog, which) -> {
-                            // Get input values
-                            String taskName = taskNameEditText.getText().toString();
-
-                            if (taskName.isEmpty()) {
-                                // Show an alert if the task name is empty
-                                new AlertDialog.Builder(DashboardActivity.this)
-                                        .setTitle("Error")
-                                        .setMessage("Please enter a task name.")
-                                        .setPositiveButton("OK", null)
-                                        .show();
-
-//                                AlertDialog dialogx = builder.create();
-//                                dialogx.getWindow().setBackgroundDrawableResource(R.drawable.rounded_dialog);
+//        addTaskButton.setOnClickListener(v -> {
+//                // Inflate the custom layout
+//                View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_task, null);
 //
-//                                dialogx.show();
+//                // Initialize the dialog fields
+//                EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
+//                Spinner statusSpinner = dialogView.findViewById(R.id.statusSpinner);
+//                TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);  // Updated to TextView for date picker
+//
+//                // Set up the spinner with status options
+//                ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this,
+//                        android.R.layout.simple_spinner_item, new String[]{"Not Started", "In Progress", "Complete"});
+//                statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//                statusSpinner.setAdapter(statusAdapter);
+//
+//                // Set up the AlertDialog
+//                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//                builder.setView(dialogView)
+//                        .setTitle("Add Task")
+//                        .setPositiveButton("Save", (dialog, which) -> {
+//                            // Get input values
+//                            String taskName = taskNameEditText.getText().toString();
+//
+//                            if (taskName.isEmpty()) {
+//                                // Show an alert if the task name is empty
+//                                new AlertDialog.Builder(DashboardActivity.this)
+//                                        .setTitle("Error")
+//                                        .setMessage("Please enter a task name.")
+//                                        .setPositiveButton("OK", null)
+//                                        .show();
+//
+////                                AlertDialog dialogx = builder.create();
+////                                dialogx.getWindow().setBackgroundDrawableResource(R.drawable.rounded_dialog);
+////
+////                                dialogx.show();
+//
+//                                return;  // Don't proceed to save the task
+//                            }
+//
+//                            if (taskName.length() < 4 || taskName.length() > 15) {
+//                                new AlertDialog.Builder(DashboardActivity.this)
+//                                        .setTitle("Error")
+//                                        .setMessage("Task name must be between 4 and 15 characters.")
+//                                        .setPositiveButton("OK", null)
+//                                        .show();
+//                                return;  // Don't proceed to save the task
+//                            }
+//
+//                            String status = statusSpinner.getSelectedItem().toString();
+//                            String deadline = deadlineTextView.getText().toString();
+//
+//                            boolean taskNameExists = false;
+//                            for (TodoItem task : todoList) {
+//                                if (task.getName().equalsIgnoreCase(taskName)) {
+//                                    taskNameExists = true;
+//                                    break;
+//                                }
+//                            }
+//
+//                            if (taskNameExists) {
+//                                // Show an alert dialog if the task name already exists
+//                                new AlertDialog.Builder(DashboardActivity.this)
+//                                        .setTitle("Error")
+//                                        .setMessage("Task name must be unique!")
+//                                        .setPositiveButton("OK", null)
+//                                        .show();
+//                            } else {
+//
+//                                TodoItem newTask = new TodoItem(taskName, status, deadline, null); // Set id as null initially
+//
+//                                // Add the task to Firestore
+//                                db.collection("users")
+//                                        .document(userId) // User's unique document
+//                                        .collection("tasks") // Subcollection for tasks
+//                                        .add(newTask)
+//                                        .addOnSuccessListener(documentReference -> {
+//                                            // Assign the generated id to the task after it's added to Firestore
+//                                            newTask.setId(documentReference.getId());
+//
+//                                            // Add task to the local list and update RecyclerView
+//                                            todoList.add(newTask);
+//                                            todoAdapter.notifyItemInserted(todoList.size() - 1);
+//                                            todoRecyclerView.scrollToPosition(todoList.size() - 1);
+//
+//                                            Log.d("Firestore", "Task added successfully: " + documentReference.getId());
+//                                        })
+//                                        .addOnFailureListener(e -> {
+//                                            Log.e("Firestore", "Error adding task", e);
+//                                            new AlertDialog.Builder(DashboardActivity.this)
+//                                                    .setTitle("Error")
+//                                                    .setMessage("Failed to save the task. Please try again.")
+//                                                    .setPositiveButton("OK", null)
+//                                                    .show();
+//                                        });
+//                            }
+//                        })
+//                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
+//
+//                // Show the dialog
+//                AlertDialog dialog = builder.create();
+//                dialog.show();
+//
+//                // Set up the DatePickerDialog for the deadline
+//                deadlineTextView.setOnClickListener(deadlineView -> {
+//                    final Calendar calendar = Calendar.getInstance();
+//                    int year = calendar.get(Calendar.YEAR);
+//                    int month = calendar.get(Calendar.MONTH);
+//                    int day = calendar.get(Calendar.DAY_OF_MONTH);
+//
+//                    DatePickerDialog datePickerDialog = new DatePickerDialog(DashboardActivity.this,
+//                            (view, selectedYear, selectedMonth, selectedDay) -> {
+//                                // Format the selected date
+//                                String selectedDate = String.format("%02d/%02d/%d", selectedMonth + 1, selectedDay, selectedYear);
+//                                deadlineTextView.setText(selectedDate);
+//                            }, year, month, day);
+//
+//                    // Disable past dates
+//                    calendar.set(year, month, day);
+//                    datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis()); // This disables all past dates.
+//
+//                    // Show the DatePickerDialog
+//                    datePickerDialog.show();
+//                });
+//        });
 
-                                return;  // Don't proceed to save the task
-                            }
+        addTaskButton.setOnClickListener(v -> {
+            // Inflate the custom layout for the dialog
+            View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_task, null);
 
-                            if (taskName.length() < 4 || taskName.length() > 15) {
+            // Initialize the dialog fields
+            EditText taskNameEditText = dialogView.findViewById(R.id.taskNameEditText);
+            Spinner statusSpinner = dialogView.findViewById(R.id.statusSpinner);
+            TextView deadlineTextView = dialogView.findViewById(R.id.deadlineTextView);  // Updated to TextView for date picker
+
+            // Set up the spinner with status options
+            ArrayAdapter<String> statusAdapter = new ArrayAdapter<>(this,
+                    android.R.layout.simple_spinner_item, new String[]{"Not Started", "In Progress", "Complete"});
+            statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            statusSpinner.setAdapter(statusAdapter);
+
+            // Create a custom dialog using a Dialog object instead of AlertDialog
+            Dialog dialog = new Dialog(this);
+            dialog.setContentView(dialogView);
+            dialog.setCancelable(true);  // Set it to be cancellable when clicking outside
+
+            // Set custom dialog window dimensions
+            dialog.getWindow().setLayout(ConstraintLayout.LayoutParams.WRAP_CONTENT, ConstraintLayout.LayoutParams.WRAP_CONTENT);
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_dialog); // Optional: Add rounded corner background
+
+            // Set the positive and negative buttons
+            Button saveButton = dialogView.findViewById(R.id.saveBtn);
+            Button cancelButton = dialogView.findViewById(R.id.cancelBtn);  // Add this button to your layout if needed
+
+            // Add Save button functionality
+            saveButton.setOnClickListener(v1 -> {
+                // Get input values
+                String taskName = taskNameEditText.getText().toString();
+
+                if (taskName.isEmpty()) {
+                    // Show an alert if the task name is empty
+                    new AlertDialog.Builder(DashboardActivity.this)
+                            .setTitle("Error")
+                            .setMessage("Please enter a task name.")
+                            .setPositiveButton("OK", null)
+                            .show();
+                    return;  // Don't proceed to save the task
+                }
+
+                if (taskName.length() < 4 || taskName.length() > 15) {
+                    new AlertDialog.Builder(DashboardActivity.this)
+                            .setTitle("Error")
+                            .setMessage("Task name must be between 4 and 15 characters.")
+                            .setPositiveButton("OK", null)
+                            .show();
+                    return;  // Don't proceed to save the task
+                }
+
+                String status = statusSpinner.getSelectedItem().toString();
+                String deadline = deadlineTextView.getText().toString();
+
+                boolean taskNameExists = false;
+                for (TodoItem task : todoList) {
+                    if (task.getName().equalsIgnoreCase(taskName)) {
+                        taskNameExists = true;
+                        break;
+                    }
+                }
+
+                if (taskNameExists) {
+                    // Show an alert dialog if the task name already exists
+                    new AlertDialog.Builder(DashboardActivity.this)
+                            .setTitle("Error")
+                            .setMessage("Task name must be unique!")
+                            .setPositiveButton("OK", null)
+                            .show();
+                } else {
+                    // Proceed to add the task to Firestore or your data source
+                    TodoItem newTask = new TodoItem(taskName, status, deadline, null); // Set id as null initially
+
+                    db.collection("users")
+                            .document(userId) // User's unique document
+                            .collection("tasks") // Subcollection for tasks
+                            .add(newTask)
+                            .addOnSuccessListener(documentReference -> {
+                                // Assign the generated id to the task after it's added to Firestore
+                                newTask.setId(documentReference.getId());
+
+                                // Add task to the local list and update RecyclerView
+                                todoList.add(newTask);
+                                todoAdapter.notifyItemInserted(todoList.size() - 1);
+                                todoRecyclerView.scrollToPosition(todoList.size() - 1);
+
+                                Log.d("Firestore", "Task added successfully: " + documentReference.getId());
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("Firestore", "Error adding task", e);
                                 new AlertDialog.Builder(DashboardActivity.this)
                                         .setTitle("Error")
-                                        .setMessage("Task name must be between 4 and 15 characters.")
+                                        .setMessage("Failed to save the task. Please try again.")
                                         .setPositiveButton("OK", null)
                                         .show();
-                                return;  // Don't proceed to save the task
-                            }
+                            });
+                }
 
-                            String status = statusSpinner.getSelectedItem().toString();
-                            String deadline = deadlineTextView.getText().toString();
+                dialog.dismiss();  // Close the dialog when the task is saved
+            });
 
-                            boolean taskNameExists = false;
-                            for (TodoItem task : todoList) {
-                                if (task.getName().equalsIgnoreCase(taskName)) {
-                                    taskNameExists = true;
-                                    break;
-                                }
-                            }
+            // Add Cancel button functionality (if any)
+            cancelButton.setOnClickListener(v2 -> dialog.dismiss());
 
-                            if (taskNameExists) {
-                                // Show an alert dialog if the task name already exists
-                                new AlertDialog.Builder(DashboardActivity.this)
-                                        .setTitle("Error")
-                                        .setMessage("Task name must be unique!")
-                                        .setPositiveButton("OK", null)
-                                        .show();
-                            } else {
+            // Show the custom dialog
+            dialog.show();
 
-                                TodoItem newTask = new TodoItem(taskName, status, deadline, null); // Set id as null initially
+            // Set up the DatePickerDialog for the deadline
+            deadlineTextView.setOnClickListener(deadlineView -> {
+                final Calendar calendar = Calendar.getInstance();
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
 
-                                // Add the task to Firestore
-                                db.collection("users")
-                                        .document(userId) // User's unique document
-                                        .collection("tasks") // Subcollection for tasks
-                                        .add(newTask)
-                                        .addOnSuccessListener(documentReference -> {
-                                            // Assign the generated id to the task after it's added to Firestore
-                                            newTask.setId(documentReference.getId());
+                DatePickerDialog datePickerDialog = new DatePickerDialog(DashboardActivity.this,
+                        (view, selectedYear, selectedMonth, selectedDay) -> {
+                            // Format the selected date
+                            String selectedDate = String.format("%02d/%02d/%d", selectedMonth + 1, selectedDay, selectedYear);
+                            deadlineTextView.setText(selectedDate);
+                        }, year, month, day);
 
-                                            // Add task to the local list and update RecyclerView
-                                            todoList.add(newTask);
-                                            todoAdapter.notifyItemInserted(todoList.size() - 1);
-                                            todoRecyclerView.scrollToPosition(todoList.size() - 1);
+                // Disable past dates
+                calendar.set(year, month, day);
+                datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis()); // This disables all past dates.
 
-                                            Log.d("Firestore", "Task added successfully: " + documentReference.getId());
-                                        })
-                                        .addOnFailureListener(e -> {
-                                            Log.e("Firestore", "Error adding task", e);
-                                            new AlertDialog.Builder(DashboardActivity.this)
-                                                    .setTitle("Error")
-                                                    .setMessage("Failed to save the task. Please try again.")
-                                                    .setPositiveButton("OK", null)
-                                                    .show();
-                                        });
-                            }
-                        })
-                        .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss());
-
-                // Show the dialog
-                AlertDialog dialog = builder.create();
-                dialog.show();
-
-                // Set up the DatePickerDialog for the deadline
-                deadlineTextView.setOnClickListener(deadlineView -> {
-                    final Calendar calendar = Calendar.getInstance();
-                    int year = calendar.get(Calendar.YEAR);
-                    int month = calendar.get(Calendar.MONTH);
-                    int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-                    DatePickerDialog datePickerDialog = new DatePickerDialog(DashboardActivity.this,
-                            (view, selectedYear, selectedMonth, selectedDay) -> {
-                                // Format the selected date
-                                String selectedDate = String.format("%02d/%02d/%d", selectedMonth + 1, selectedDay, selectedYear);
-                                deadlineTextView.setText(selectedDate);
-                            }, year, month, day);
-
-                    // Disable past dates
-                    calendar.set(year, month, day);
-                    datePickerDialog.getDatePicker().setMinDate(calendar.getTimeInMillis()); // This disables all past dates.
-
-                    // Show the DatePickerDialog
-                    datePickerDialog.show();
-                });
+                // Show the DatePickerDialog
+                datePickerDialog.show();
+            });
         });
+
 
         removeTaskButton.setOnClickListener(v -> {
             if (!todoList.isEmpty()) {
